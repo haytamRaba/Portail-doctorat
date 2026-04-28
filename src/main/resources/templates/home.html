@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PhD Tracking Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .message {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1> PhD Tracking Portal</h1>
+
+    <!-- th:text replaces the content with Java variable -->
+    <div class="message" th:text="${message}">
+         messagE
+    </div>
+
+    <p>Year: <span th:text="${currentYear}">2024</span></p>
+
+    <h2>What we'll build:</h2>
+    <ul>
+        <li>PhD student registration</li>
+        <li> Document upload</li>
+        <li> Thesis defense management</li>
+        <li>Admin dashboard</li>
+    </ul>
+</div>
+</body>
+</html>
