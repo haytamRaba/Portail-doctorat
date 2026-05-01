@@ -25,7 +25,6 @@ public class User {
 
     private LocalDateTime registrationDate;
 
-    // Constructors
     public User() {}
 
     public User(String email, String password, String fullName, String role) {

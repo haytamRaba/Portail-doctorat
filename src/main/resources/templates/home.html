@@ -27,26 +27,38 @@
             border-radius: 5px;
             margin: 20px 0;
         }
+
     </style>
 </head>
-<body>
-<div class="container">
-    <h1> PhD Tracking Portal</h1>
+    <body>
+        <div class="container">
+            <h1> PhD Tracking Portal</h1>
 
-    <!-- th:text replaces the content with Java variable -->
-    <div class="message" th:text="${message}">
-         messagE
-    </div>
+            <!-- th:text replaces the content with Java variable -->
+            <div class="message" th:text="${message}">
+                 messagE
+            </div>
 
-    <p>Year: <span th:text="${currentYear}">2024</span></p>
+            <p>Year: <span th:text="${currentYear}">2024</span></p>
 
-    <h2>What we'll build:</h2>
-    <ul>
-        <li>PhD student registration</li>
-        <li> Document upload</li>
-        <li> Thesis defense management</li>
-        <li>Admin dashboard</li>
-    </ul>
-</div>
-</body>
+            <ul>
+                <li>PhD student registration</li>
+                <li> Document upload</li>
+                <li> Thesis defense management</li>
+                <li>Admin dashboard</li>
+            </ul>
+
+
+               <form method="post" >
+
+                   <input type="email" name="email" placeholder="Email" required>
+                   <input type="password" name="password" placeholder="Password" required>
+                   <input type="text" name="fullName" placeholder="Full Name" required>
+                   <input type="text" name="comment" placeholder="content" >
+
+                   <button type="submit">click</button>
+               </form>
+
+        </div>
+    </body>
 </html>

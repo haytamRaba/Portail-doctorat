@@ -42,10 +42,19 @@
         button:hover {
             background-color: #0b7dda;
         }
+        .error {
+            color: red;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+        }
         .success {
             color: green;
             margin: 10px 0;
-            text-align: center;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
         }
         .link {
             text-align: center;
@@ -62,8 +71,10 @@
     <h2>Login to PhD Portal</h2>
 
     <div th:if="${success}" class="success" th:text="${success}"></div>
+    <div th:if="${error}" class="error" th:text="${error}"></div>
 
-    <form method="post" action="/login">
+    <!-- IMPORTANT: th:action for POST -->
+    <form method="post" th:action="@{/login}">
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Login</button>

@@ -45,6 +45,16 @@
         .error {
             color: red;
             margin: 10px 0;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
         }
         .link {
             text-align: center;
@@ -62,16 +72,20 @@
 
     <div th:if="${error}" class="error" th:text="${error}"></div>
 
-    <form method="post" action="/register">
+    <!--  th:action CSRF token -->
+    <form method="post" th:action="@{/register}">
+
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Password" required>
         <input type="text" name="fullName" placeholder="Full Name" required>
+
         <select name="role" required>
             <option value="">Select Role</option>
             <option value="DOCTORANT">PhD Student (Doctorant)</option>
             <option value="DIRECTOR">Thesis Director</option>
             <option value="ADMIN">Administrator</option>
         </select>
+
         <button type="submit">Register</button>
     </form>
 
