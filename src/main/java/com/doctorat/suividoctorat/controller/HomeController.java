@@ -4,6 +4,7 @@ import com.doctorat.suividoctorat.entity.PhDRegistration;
 import com.doctorat.suividoctorat.entity.User;
 import com.doctorat.suividoctorat.service.PhDRegistrationService;
 import com.doctorat.suividoctorat.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -59,40 +60,72 @@ public class HomeController {
             return "register";
         }
     }
+    @GetMapping("/check-session")
+    @ResponseBody
+    public String checkSession(HttpSession session) {
+        Long userId = (Long) session.getAttribute("loggedUserId");
+        User user = null;
+        if (userId != null) {
+            user = userService.findUserById(userId);
+        }
 
-
-
-
+        return "Session ID: " + session.getId() +
+                "\nIs session new " + session.isNew() +
+                "\nUser ID in session: " + userId +
+                "\nUser from ID: " + (user != null ? user.getEmail() : "null") +
+                "\nUser role: " + (user != null ? user.getRole() : "null");
+    }
     @GetMapping("/login")
     public String showLoginForm() {
         return "login";
     }
 
-    @PostMapping("/login")
-    public String processLogin(@RequestParam String email, @RequestParam String password, Model model,HttpSession session) {
+    private User getCurrentUser(HttpSession session) {
+        Long userId = (Long) session.getAttribute("loggedUserId");
 
+        if (userId == null) {
+            System.out.println("No userId in session");
+            return null;
+        }
+
+        System.out.println("Fetching user with ID: " + userId);
+        User user = userService.findUserById(userId);
+
+        if (user == null) {
+            System.out.println("User not found with ID: " + userId);
+            return null;
+        }
+
+        return user;
+    }
+    @PostMapping("/login")
+    public String processLogin(
+            @RequestParam String email,
+            @RequestParam String password,
+            Model model,
+            HttpSession session) {
+
+        System.out.println("=== PROCESS LOGIN ===");
 
         if (userService.checkLogin(email, password)) {
-            System.out.print(".");
             User user = userService.findByEmail(email);
-            System.out.print(".");
-            model.addAttribute("user", user);
-            System.out.print(".");
-            session.setAttribute("loggedUser", user);
-            System.out.print(".");
-            System.out.println("== cureent user before redirect to dashboard : "+user.getFullName());
 
+            session.setAttribute("loggedUserId", user.getId());
+
+            System.out.println("User ID stored in session: " + user.getId());
+            System.out.println("Session ID: " + session.getId());
+
+            model.addAttribute("user", user);
             return "dashboard";
         } else {
             model.addAttribute("error", "Invalid email or password");
             return "login";
         }
     }
-
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
 
-        User currentUser = (User) session.getAttribute("loggedUser");
+        User currentUser = getCurrentUser(session);
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -121,7 +154,7 @@ public class HomeController {
     @GetMapping("/doctorant/register-phd")
     public String showPhDRegistrationForm(Model model, HttpSession session) {
 
-        User currentUser = (User) session.getAttribute("loggedUser");
+        User currentUser = getCurrentUser(session);
         if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
             return "redirect:/login";
         }
@@ -138,13 +171,37 @@ public class HomeController {
             @RequestParam("diplomaFile") MultipartFile diplomaFile,
             @RequestParam("cvFile") MultipartFile cvFile,
             @RequestParam("additionalFile") MultipartFile additionalFile,
+            @RequestParam(required = false) String sessionId,
             RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
             HttpSession session) {
-        User currentUser = (User) session.getAttribute("loggedUser");
 
-        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
+
+        System.out.println("=== PROCESSING PHD REGISTRATION ===");
+        System.out.println("Current session ID: " + session.getId());
+        System.out.println("Received session ID: " + sessionId);
+        System.out.println("Is session new" + session.isNew());
+
+        User currentUser = getCurrentUser(session);
+
+
+        if (currentUser == null && sessionId != null) {
+            System.out.println("Session lost! Attempting recovery...");
+
+        }
+
+        if (currentUser == null) {
+            System.out.println("ERROR: No user in session!");
+            redirectAttributes.addFlashAttribute("error", "Your session expired. Please login again.");
             return "redirect:/login";
         }
+
+        if (!currentUser.getRole().equals("DOCTORANT")) {
+            System.out.println("ERROR: User is not a DOCTORANT. Role: " + currentUser.getRole());
+            return "redirect:/login";
+        }
+
+        System.out.println("User found: " + currentUser.getEmail());
 
         try {
             PhDRegistration registration = new PhDRegistration(
@@ -153,6 +210,7 @@ public class HomeController {
 
             phdRegistrationService.saveRegistration(registration, diplomaFile, cvFile, additionalFile);
             redirectAttributes.addFlashAttribute("success", "PhD registration submitted successfully!");
+            System.out.println("SUCCESS: Registration saved");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,11 +219,10 @@ public class HomeController {
 
         return "redirect:/dashboard";
     }
-
     @GetMapping("/registration/{id}")
     public String viewRegistration(@PathVariable Long id, Model model, HttpSession session) {
         PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
-        User currentUser = (User) session.getAttribute("loggedUser");
+        User currentUser = getCurrentUser(session);
         if (registration == null) {
             return "redirect:/dashboard";
         }
@@ -185,7 +242,7 @@ public class HomeController {
                                       @RequestParam String action,
                                       @RequestParam String feedback,
                                       RedirectAttributes redirectAttributes, HttpSession session) {
-        User currentUser = (User) session.getAttribute("loggedUser");
+        User currentUser = getCurrentUser(session);
         String status = action.equals("approve") ? "APPROVED" : "REJECTED";
         String approverRole = currentUser.getRole();
 

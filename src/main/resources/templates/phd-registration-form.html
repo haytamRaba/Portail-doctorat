@@ -130,6 +130,7 @@
     <a href="/dashboard">Dashboard</a>
     <a href="/doctorant/register-phd">New Application</a>
     <a href="/">Home</a>
+    <a href="/logout">logout</a>
 </div>
 
 <div class="container">
@@ -139,6 +140,8 @@
     </div>
 
     <div class="form-section">
+
+        <input type="hidden" name="sessionId" th:value="${session.id}" />
         <form method="post" enctype="multipart/form-data">
             <!-- Thesis Information -->
             <div class="form-group">
@@ -152,9 +155,6 @@
                 <select name="researchDomain" required>
                     <option value="">Select domain</option>
                     <option value="Computer Science">Computer Science</option>
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
                     <option value="Biology">Biology</option>
                     <option value="Engineering">Engineering</option>
                     <option value="Economics">Economics</option>

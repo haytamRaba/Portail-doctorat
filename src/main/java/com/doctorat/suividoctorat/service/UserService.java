@@ -46,7 +46,9 @@ public class UserService {
 
         return "Registration successful!";
     }
-
+    public User findUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
     // Find user by email
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
