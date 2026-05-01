@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 public class HomeController {
 
@@ -72,10 +75,7 @@ public class HomeController {
     }
 
     @PostMapping("/login")
-    public String processLogin(
-            @RequestParam String email,
-            @RequestParam String password,
-            Model model) {
+    public String processLogin(@RequestParam String email, @RequestParam String password, Model model) {
 
 
         if (userService.checkLogin(email, password)) {
@@ -99,19 +99,22 @@ public class HomeController {
             return "redirect:/login";
         }
         System.out.println(" === currentuser not null "+ currentUser.getFullName());
-
+        List<PhDRegistration> registrations = new ArrayList<>();
         model.addAttribute("user", currentUser);
 
         // Show registrations based on role
         if (currentUser.getRole().equals("DOCTORANT")) {
-            model.addAttribute("registrations",
-                    phdRegistrationService.getRegistrationsByDoctorant(currentUser));
+            registrations = phdRegistrationService.getRegistrationsByDoctorant(currentUser);
+            model.addAttribute("registrations", registrations);
         } else if (currentUser.getRole().equals("DIRECTOR")) {
             model.addAttribute("registrations",
                     phdRegistrationService.getRegistrationsByDirector(currentUser.getFullName()));
         } else if (currentUser.getRole().equals("ADMIN")) {
             model.addAttribute("registrations",
                     phdRegistrationService.getPendingRegistrations());
+        }
+        else{
+            model.addAttribute("registrations", new ArrayList<>());
         }
 
         return "dashboard";
