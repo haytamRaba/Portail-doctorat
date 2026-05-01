@@ -61,13 +61,7 @@ public class HomeController {
     }
 
 
-//    @GetMapping("/login/test/{id}")
-//    public String testId(Model model){
-//        String myMessage="testo testing my test";
-//        model.addAttribute("testop", myMessage);
-//
-//        return "testo";
-//    }
+
 
     @GetMapping("/login")
     public String showLoginForm() {
@@ -97,6 +91,7 @@ public class HomeController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
+
         User currentUser = (User) session.getAttribute("loggedUser");
         if (currentUser == null) {
             return "redirect:/login";
@@ -105,7 +100,7 @@ public class HomeController {
         List<PhDRegistration> registrations = new ArrayList<>();
         model.addAttribute("user", currentUser);
 
-        // Show registrations based on role
+        //  based on role
         if (currentUser.getRole().equals("DOCTORANT")) {
             registrations = phdRegistrationService.getRegistrationsByDoctorant(currentUser);
             model.addAttribute("registrations", registrations);
@@ -200,7 +195,11 @@ public class HomeController {
         return "redirect:/dashboard";
     }
 
-
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
 
 
 
