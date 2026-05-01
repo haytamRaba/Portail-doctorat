@@ -4,6 +4,7 @@ import com.doctorat.suividoctorat.entity.PhDRegistration;
 import com.doctorat.suividoctorat.entity.User;
 import com.doctorat.suividoctorat.service.PhDRegistrationService;
 import com.doctorat.suividoctorat.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +24,6 @@ public class HomeController {
     @Autowired
     private PhDRegistrationService phdRegistrationService;
 
-    private User currentUser;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -75,7 +75,7 @@ public class HomeController {
     }
 
     @PostMapping("/login")
-    public String processLogin(@RequestParam String email, @RequestParam String password, Model model) {
+    public String processLogin(@RequestParam String email, @RequestParam String password, Model model,HttpSession session) {
 
 
         if (userService.checkLogin(email, password)) {
@@ -83,6 +83,8 @@ public class HomeController {
             User user = userService.findByEmail(email);
             System.out.print(".");
             model.addAttribute("user", user);
+            System.out.print(".");
+            session.setAttribute("loggedUser", user);
             System.out.print(".");
             System.out.println("== cureent user before redirect to dashboard : "+user.getFullName());
 
@@ -94,7 +96,8 @@ public class HomeController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpSession session) {
+        User currentUser = (User) session.getAttribute("loggedUser");
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -121,7 +124,9 @@ public class HomeController {
     }
 
     @GetMapping("/doctorant/register-phd")
-    public String showPhDRegistrationForm(Model model) {
+    public String showPhDRegistrationForm(Model model, HttpSession session) {
+
+        User currentUser = (User) session.getAttribute("loggedUser");
         if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
             return "redirect:/login";
         }
@@ -138,7 +143,9 @@ public class HomeController {
             @RequestParam("diplomaFile") MultipartFile diplomaFile,
             @RequestParam("cvFile") MultipartFile cvFile,
             @RequestParam("additionalFile") MultipartFile additionalFile,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+        User currentUser = (User) session.getAttribute("loggedUser");
 
         if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
             return "redirect:/login";
@@ -161,9 +168,9 @@ public class HomeController {
     }
 
     @GetMapping("/registration/{id}")
-    public String viewRegistration(@PathVariable Long id, Model model) {
+    public String viewRegistration(@PathVariable Long id, Model model, HttpSession session) {
         PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
-
+        User currentUser = (User) session.getAttribute("loggedUser");
         if (registration == null) {
             return "redirect:/dashboard";
         }
@@ -182,8 +189,8 @@ public class HomeController {
     public String approveRegistration(@PathVariable Long id,
                                       @RequestParam String action,
                                       @RequestParam String feedback,
-                                      RedirectAttributes redirectAttributes) {
-
+                                      RedirectAttributes redirectAttributes, HttpSession session) {
+        User currentUser = (User) session.getAttribute("loggedUser");
         String status = action.equals("approve") ? "APPROVED" : "REJECTED";
         String approverRole = currentUser.getRole();
 
