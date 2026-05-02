@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Publication - PhD Tracking Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            overflow: hidden;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .form-section {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #27ae60;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #229954;
+        }
+
+        .btn-back {
+            background: #95a5a6;
+            margin-top: 10px;
+        }
+
+        .btn-back:hover {
+            background: #7f8c8d;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .requirement-badge {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/doctorant/prerequisites">Prerequisites</a>
+    <a href="/">Home</a>
+    <a href="/logout" style="float: right;">Logout</a>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>Add Publication</h1>
+        <p>Record your research publications</p>
+    </div>
+
+    <div class="form-section">
+        <div class="requirement-badge">
+            <strong>📋 Requirement:</strong> Need 2 articles in Q1/Q2 journals + 2 conferences
+        </div>
+
+        <form method="post">
+            <div class="form-group">
+                <label>Publication Title *</label>
+                <input type="text" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label>Journal or Conference Name *</label>
+                <input type="text" name="journalOrConferenceName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type *</label>
+                <select name="type" id="typeSelect" required onchange="toggleQuartile()">
+                    <option value="">Select type</option>
+                    <option value="ARTICLE">📄 Article (Journal)</option>
+                    <option value="CONFERENCE">🎤 Conference</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="quartileGroup" style="display: none;">
+                <label>Quartile (for Articles only) *</label>
+                <select name="quartile">
+                    <option value="">Select quartile</option>
+                    <option value="Q1">Q1 (Top 25%)</option>
+                    <option value="Q2">Q2 (25-50%)</option>
+                    <option value="Q3">Q3 (50-75%)</option>
+                    <option value="Q4">Q4 (Bottom 25%)</option>
+                </select>
+                <div class="info-text">Only Q1/Q2 articles count toward the requirement</div>
+            </div>
+
+            <div class="form-group">
+                <label>Publication Date</label>
+                <input type="date" name="publicationDate">
+            </div>
+
+            <button type="submit">Add Publication</button>
+            <a href="/doctorant/prerequisites" class="btn-back" style="display: block; text-align: center; text-decoration: none;">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleQuartile() {
+        var type = document.getElementById('typeSelect').value;
+        var quartileGroup = document.getElementById('quartileGroup');
+        if (type === 'ARTICLE') {
+            quartileGroup.style.display = 'block';
+        } else {
+            quartileGroup.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

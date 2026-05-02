@@ -13,6 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+
+import com.doctorat.suividoctorat.dto.ProgressDTO;
+import com.doctorat.suividoctorat.entity.Publication;
+import com.doctorat.suividoctorat.entity.Training;
+import com.doctorat.suividoctorat.service.PrerequisiteService;
+
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +33,8 @@ public class HomeController {
     @Autowired
     private PhDRegistrationService phdRegistrationService;
 
+    @Autowired
+    private PrerequisiteService prerequisiteService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -250,6 +260,142 @@ public class HomeController {
         redirectAttributes.addFlashAttribute("success", "Registration " + status.toLowerCase() + "!");
 
         return "redirect:/dashboard";
+    }
+
+    @GetMapping("/doctorant/prerequisites")
+    public String showPrerequisites(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
+            return "redirect:/login";
+        }
+
+        ProgressDTO progress = prerequisiteService.calculateProgress(currentUser);
+        List<Publication> publications = prerequisiteService.getPublicationsByDoctorant(currentUser);
+        List<Training> trainings = prerequisiteService.getTrainingsByDoctorant(currentUser);
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("progress", progress);
+        model.addAttribute("publications", publications);
+        model.addAttribute("trainings", trainings);
+
+        return "prerequisites-dashboard";
+    }
+    @GetMapping("/doctorant/add-publication")
+    public String showAddPublicationForm(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("publication", new Publication());
+        return "add-publication";
+    }
+
+    // Process add publication
+    @PostMapping("/doctorant/add-publication")
+    public String addPublication(
+            @RequestParam String title,
+            @RequestParam String journalOrConferenceName,
+            @RequestParam String type,
+            @RequestParam(required = false) String quartile,
+            @RequestParam(required = false) String publicationDate,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
+            return "redirect:/login";
+        }
+
+        try {
+            LocalDate date = (publicationDate != null && !publicationDate.isEmpty())
+                    ? LocalDate.parse(publicationDate) : LocalDate.now();
+
+            Publication publication = new Publication(currentUser, title, journalOrConferenceName,
+                    type, quartile, date);
+            prerequisiteService.addPublication(publication);
+            redirectAttributes.addFlashAttribute("success", "Publication added successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error adding publication: " + e.getMessage());
+        }
+
+        return "redirect:/doctorant/prerequisites";
+    }
+
+    // Show add training form
+    @GetMapping("/doctorant/add-training")
+    public String showAddTrainingForm(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("training", new Training());
+        return "add-training";
+    }
+
+    // Process add training
+    @PostMapping("/doctorant/add-training")
+    public String addTraining(
+            @RequestParam String courseName,
+            @RequestParam Integer hours,
+            @RequestParam(required = false) String provider,
+            @RequestParam(required = false) String completionDate,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
+            return "redirect:/login";
+        }
+
+        try {
+            LocalDate date = (completionDate != null && !completionDate.isEmpty())
+                    ? LocalDate.parse(completionDate) : LocalDate.now();
+
+            Training training = new Training(currentUser, courseName, hours, provider, date);
+            prerequisiteService.addTraining(training);
+            redirectAttributes.addFlashAttribute("success", "Training added successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error adding training: " + e.getMessage());
+        }
+
+        return "redirect:/doctorant/prerequisites";
+    }
+
+    // Delete publication
+    @GetMapping("/doctorant/delete-publication/{id}")
+    public String deletePublication(@PathVariable Long id, RedirectAttributes redirectAttributes, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        prerequisiteService.deletePublication(id);
+        redirectAttributes.addFlashAttribute("success", "Publication deleted!");
+        return "redirect:/doctorant/prerequisites";
+    }
+
+    // Delete training
+    @GetMapping("/doctorant/delete-training/{id}")
+    public String deleteTraining(@PathVariable Long id, RedirectAttributes redirectAttributes, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        prerequisiteService.deleteTraining(id);
+        redirectAttributes.addFlashAttribute("success", "Training deleted!");
+        return "redirect:/doctorant/prerequisites";
     }
 
     @GetMapping("/logout")
