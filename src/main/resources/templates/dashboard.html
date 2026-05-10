@@ -5,115 +5,178 @@
     <title>Dashboard - PhD Portal</title>
 
     <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        body{
-            font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
-            background:#f0f2f5;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
         }
 
-        .navbar{
-            background:#2c3e50;
-            padding:15px 20px;
-            box-shadow:0 2px 4px rgba(0,0,0,0.1);
+        .navbar {
+            background: #2c3e50;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        .navbar a{
-            color:white;
-            text-decoration:none;
-            padding:10px 15px;
-            display:inline-block;
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
         }
 
-        .navbar a:hover{
-            background:#34495e;
-            border-radius:5px;
+        .navbar a:hover {
+            background: #34495e;
+            border-radius: 5px;
         }
 
-        .container{
-            max-width:1200px;
-            margin:30px auto;
-            padding:0 20px;
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
 
         .user-info,
-        .card{
-            background:white;
-            padding:20px;
-            border-radius:10px;
-            margin-bottom:20px;
-            box-shadow:0 2px 4px rgba(0,0,0,0.1);
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .card h3{
-            color:#2c3e50;
-            margin-bottom:15px;
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
         }
 
-        .status{
-            display:inline-block;
-            padding:5px 10px;
-            border-radius:5px;
-            font-size:12px;
-            font-weight:bold;
-            color:white;
+        /* Status Styles */
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
         }
 
-        .status-PENDING{ background:#f39c12; }
-        .status-APPROVED{ background:#27ae60; }
-        .status-REJECTED{ background:#e74c3c; }
+        .status-PENDING { background: #f39c12; }
+        .status-APPROVED { background: #27ae60; }
+        .status-REJECTED { background: #e74c3c; }
+        .status-DIRECTOR_APPROVED { background: #3498db; }
+        .status-DIRECTOR_REJECTED { background: #e74c3c; }
 
-        .btn{
-            display:inline-block;
-            padding:10px 20px;
-            background:#3498db;
-            color:white;
-            text-decoration:none;
-            border-radius:5px;
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
         }
 
-        .btn:hover{
-            background:#2980b9;
+        .btn:hover {
+            background: #2980b9;
         }
 
-        .alert{
-            padding:15px;
-            margin-bottom:20px;
-            border-radius:5px;
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
         }
 
-        .alert-success{
-            background:#d4edda;
-            color:#155724;
+        /* Alert Styles */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
 
-        .alert-error{
-            background:#f8d7da;
-            color:#721c24;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
-        table{
-            width:100%;
-            border-collapse:collapse;
-            margin-top:15px;
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        th, td{
-            padding:12px;
-            text-align:left;
-            border-bottom:1px solid #ddd;
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
         }
 
-        th{
-            background:#f8f9fa;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
 
-        tr:hover{
-            background:#f8f9fa;
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Progress Bar Styles for Campaign Timer */
+        .progress-section {
+            margin: 15px 0;
+        }
+
+        .progress-item {
+            margin-bottom: 15px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .progress-bar-container {
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 30px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-green {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+        }
+
+        .progress-orange {
+            background: linear-gradient(90deg, #e67e22, #f39c12);
+        }
+
+        .progress-red {
+            background: linear-gradient(90deg, #c0392b, #e74c3c);
         }
     </style>
 </head>
@@ -121,37 +184,35 @@
 <body>
 
 <div class="navbar">
-
     <a th:href="@{/dashboard}">Dashboard</a>
 
-    <a th:if="${user.role == 'DOCTORANT'}"
-       th:href="@{/doctorant/register-phd}">
+    <a th:if="${user.role == 'DOCTORANT'}" th:href="@{/doctorant/register-phd}">
         New PhD Application
+    </a>
+
+    <a th:if="${user.role == 'ADMIN'}" th:href="@{/admin/campaigns}">
+        Manage Campaigns
     </a>
 
     <a th:href="@{/}">Home</a>
     <a href="/logout" style="float: right;">Logout</a>
-
 </div>
 
 <div class="container">
 
     <div th:if="${success != null}" class="alert alert-success" th:text="${success}"></div>
-
     <div th:if="${error != null}" class="alert alert-error" th:text="${error}"></div>
 
     <div class="user-info">
-        <h2>
-            Welcome,
-            <span th:text="${user.fullName}">User</span> !
-        </h2>
-
+        <h2>Welcome, <span th:text="${user.fullName}">User</span>!</h2>
         <p>Email: <span th:text="${user.email}">email@example.com</span></p>
         <p>Role: <span th:text="${user.role}">ROLE</span></p>
     </div>
 
-    <!-- DOCTORANT -->
+    <!-- ===== DOCTORANT SECTION ===== -->
     <div th:if="${user.role == 'DOCTORANT'}">
+
+        <!-- Active Campaign Card -->
         <div class="card" th:if="${activeCampaign != null}">
             <h3>📢 Active Registration Campaign</h3>
             <p><strong th:text="${activeCampaign.name}">Campaign Name</strong></p>
@@ -175,33 +236,29 @@
             <a href="/doctorant/register-phd" class="btn">Submit Application Now</a>
         </div>
 
+        <!-- No Active Campaign Message -->
         <div class="card" th:if="${activeCampaign == null}">
-            <h3>📢 No Active Campaign</h3>
+            <h3>📢 No Active Registration Campaign</h3>
             <p>There is no active registration campaign at this time.</p>
             <p>Please check back later or contact the administration.</p>
         </div>
-    </div>
 
-    <div th:if="${user.role == 'DOCTORANT'}">
-
+        <!-- Prerequisites Card -->
         <div class="card">
-            <h3>Thesis Defense Prerequisites</h3>
+            <h3>📊 Thesis Defense Prerequisites</h3>
             <p>Track your progress toward defense eligibility: publications and training hours</p>
             <a href="/doctorant/prerequisites" class="btn">View Prerequisites</a>
         </div>
 
-
+        <!-- My PhD Applications Card -->
         <div class="card">
-
-
-            <h3>My PhD Applications</h3>
+            <h3>📋 My PhD Applications</h3>
 
             <div th:if="${registrations == null or registrations.empty}">
                 <p>You haven't submitted any PhD applications yet.</p>
-
-                <a th:href="@{/doctorant/register-phd}" class="btn">
-                    Start New Application
-                </a>
+                <div th:if="${activeCampaign != null}">
+                    <a th:href="@{/doctorant/register-phd}" class="btn">Start New Application</a>
+                </div>
             </div>
 
             <table th:if="${registrations != null and !registrations.empty}">
@@ -215,41 +272,30 @@
                     <th>Action</th>
                 </tr>
                 </thead>
-
                 <tbody>
                 <tr th:each="reg : ${registrations}">
                     <td th:text="${reg.id}">1</td>
                     <td th:text="${reg.thesisSubject}">Subject</td>
                     <td th:text="${reg.directorName}">Director</td>
-                    <td th:text="${reg.submissionDate}">Date</td>
-
+                    <td th:text="${#temporals.format(reg.submissionDate, 'dd/MM/yyyy')}">Date</td>
                     <td>
-                        <span class="status"
-                              th:classappend="' status-' + ${reg.status}"
-                              th:text="${reg.status}">
-                            PENDING
-                        </span>
+                            <span class="status" th:classappend="' status-' + ${reg.status}" th:text="${reg.status}">
+                                PENDING
+                            </span>
                     </td>
-
                     <td>
-                        <a class="btn"
-                           th:href="@{/registration/{id}(id=${reg.id})}">
-                            View
-                        </a>
+                        <a class="btn btn-sm" th:href="@{/registration/{id}(id=${reg.id})}">View</a>
                     </td>
                 </tr>
                 </tbody>
             </table>
-
         </div>
     </div>
 
-    <!-- DIRECTOR -->
+    <!-- ===== DIRECTOR SECTION ===== -->
     <div th:if="${user.role == 'DIRECTOR'}">
-
         <div class="card">
-
-            <h3>Applications to Review</h3>
+            <h3>📋 Applications to Review</h3>
 
             <div th:if="${registrations == null or registrations.empty}">
                 <p>No pending applications to review.</p>
@@ -265,43 +311,32 @@
                     <th>Action</th>
                 </tr>
                 </thead>
-
                 <tbody>
                 <tr th:each="reg : ${registrations}">
                     <td th:text="${reg.doctorant.fullName}">Student</td>
                     <td th:text="${reg.thesisSubject}">Subject</td>
-                    <td th:text="${reg.submissionDate}">Date</td>
-
+                    <td th:text="${#temporals.format(reg.submissionDate, 'dd/MM/yyyy')}">Date</td>
                     <td>
-                        <span class="status"
-                              th:classappend="' status-' + ${reg.status}"
-                              th:text="${reg.status}">
-                            PENDING
-                        </span>
+                            <span class="status" th:classappend="' status-' + ${reg.status}" th:text="${reg.status}">
+                                PENDING
+                            </span>
                     </td>
-
                     <td>
-                        <a class="btn"
-                           th:href="@{/registration/{id}(id=${reg.id})}">
-                            Review
-                        </a>
+                        <a class="btn btn-sm" th:href="@{/director/review/{id}(id=${reg.id})}">Review</a>
                     </td>
                 </tr>
                 </tbody>
             </table>
-
         </div>
     </div>
 
-    <!-- ADMIN -->
+    <!-- ===== ADMIN SECTION ===== -->
     <div th:if="${user.role == 'ADMIN'}">
-
         <div class="card">
-
-            <h3>All Pending Applications</h3>
+            <h3>📋 All Pending Applications (Director Approved)</h3>
 
             <div th:if="${registrations == null or registrations.empty}">
-                <p>No pending applications.</p>
+                <p>No pending applications for final approval.</p>
             </div>
 
             <table th:if="${registrations != null and !registrations.empty}">
@@ -311,27 +346,29 @@
                     <th>Director</th>
                     <th>Thesis Subject</th>
                     <th>Submission Date</th>
+                    <th>Director Comments</th>
                     <th>Action</th>
                 </tr>
                 </thead>
-
                 <tbody>
                 <tr th:each="reg : ${registrations}">
                     <td th:text="${reg.doctorant.fullName}">Student</td>
                     <td th:text="${reg.directorName}">Director</td>
                     <td th:text="${reg.thesisSubject}">Subject</td>
-                    <td th:text="${reg.submissionDate}">Date</td>
-
+                    <td th:text="${#temporals.format(reg.submissionDate, 'dd/MM/yyyy')}">Date</td>
+                    <td th:text="${reg.directorFeedback}">Comments</td>
                     <td>
-                        <a class="btn"
-                           th:href="@{/registration/{id}(id=${reg.id})}">
-                            Review
-                        </a>
+                        <a class="btn btn-sm" th:href="@{/admin/review/{id}(id=${reg.id})}">Final Review</a>
                     </td>
                 </tr>
                 </tbody>
             </table>
+        </div>
 
+        <!-- Quick Admin Links -->
+        <div class="card">
+            <h3>⚙️ Admin Actions</h3>
+            <a href="/admin/campaigns" class="btn">Manage Registration Campaigns</a>
         </div>
     </div>
 

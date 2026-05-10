@@ -67,4 +67,21 @@ public class ProgressDTO {
         int sum = getArticleProgressPercent() + getConferenceProgressPercent() + getTrainingProgressPercent();
         return sum / 3;
     }
+    public String getArticleBarClass() {
+        if (articlesRequirementMet) return "progress-green";
+        if (articleCount > 0) return "progress-orange";
+        return "progress-red";
+    }
+
+    public String getConferenceBarClass() {
+        if (conferencesRequirementMet) return "progress-green";
+        if (conferenceCount > 0) return "progress-orange";
+        return "progress-red";
+    }
+
+    public String getTrainingBarClass() {
+        if (trainingRequirementMet) return "progress-green";
+        if (totalTrainingHours > 0) return "progress-orange";
+        return "progress-red";
+    }
 }
