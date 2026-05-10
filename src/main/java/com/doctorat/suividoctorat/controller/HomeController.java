@@ -2,6 +2,7 @@ package com.doctorat.suividoctorat.controller;
 
 import com.doctorat.suividoctorat.entity.PhDRegistration;
 import com.doctorat.suividoctorat.entity.User;
+import com.doctorat.suividoctorat.service.EmailService;
 import com.doctorat.suividoctorat.service.PhDRegistrationService;
 import com.doctorat.suividoctorat.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +36,9 @@ public class HomeController {
 
     @Autowired
     private PrerequisiteService prerequisiteService;
-
+    @Autowired
+    private EmailService emailService;
+    
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("message", " PhD Tracking Portal");
@@ -181,54 +184,132 @@ public class HomeController {
             @RequestParam("diplomaFile") MultipartFile diplomaFile,
             @RequestParam("cvFile") MultipartFile cvFile,
             @RequestParam("additionalFile") MultipartFile additionalFile,
-            @RequestParam(required = false) String sessionId,
             RedirectAttributes redirectAttributes,
-            HttpServletRequest request,
             HttpSession session) {
-
-
-        System.out.println("=== PROCESSING PHD REGISTRATION ===");
-        System.out.println("Current session ID: " + session.getId());
-        System.out.println("Received session ID: " + sessionId);
-        System.out.println("Is session new" + session.isNew());
 
         User currentUser = getCurrentUser(session);
 
-
-        if (currentUser == null && sessionId != null) {
-            System.out.println("Session lost! Attempting recovery...");
-
-        }
-
-        if (currentUser == null) {
-            System.out.println("ERROR: No user in session!");
-            redirectAttributes.addFlashAttribute("error", "Your session expired. Please login again.");
+        if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
             return "redirect:/login";
         }
-
-        if (!currentUser.getRole().equals("DOCTORANT")) {
-            System.out.println("ERROR: User is not a DOCTORANT. Role: " + currentUser.getRole());
-            return "redirect:/login";
-        }
-
-        System.out.println("User found: " + currentUser.getEmail());
 
         try {
             PhDRegistration registration = new PhDRegistration(
                     currentUser, thesisSubject, researchDomain, directorName, coDirectorName
             );
 
+            // Save registration with files
             phdRegistrationService.saveRegistration(registration, diplomaFile, cvFile, additionalFile);
-            redirectAttributes.addFlashAttribute("success", "PhD registration submitted successfully!");
-            System.out.println("SUCCESS: Registration saved");
+
+            // NOTIFY DIRECTOR
+            // Find director by name (simplified - you'd want by email in production)
+            User director = userService.findByFullName(directorName);
+            if (director != null && director.getRole().equals("DIRECTOR")) {
+                emailService.sendDirectorNotification(registration, director);
+                redirectAttributes.addFlashAttribute("success",
+                        "PhD registration submitted! Director has been notified.");
+            } else {
+                redirectAttributes.addFlashAttribute("warning",
+                        "Application submitted but director email not found. Please contact administration.");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Error submitting registration: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
         }
 
         return "redirect:/dashboard";
     }
+    // Director approval page
+    @GetMapping("/director/review/{id}")
+    public String showDirectorReview(@PathVariable Long id, Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DIRECTOR")) {
+            return "redirect:/login";
+        }
+
+        PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
+
+        if (registration == null || !registration.getDirectorName().equals(currentUser.getFullName())) {
+            return "redirect:/dashboard";
+        }
+
+        model.addAttribute("registration", registration);
+        model.addAttribute("user", currentUser);
+        return "director-review";
+    }
+
+    // Process director approval
+    @PostMapping("/director/approve/{id}")
+    public String directorApprove(@PathVariable Long id,
+                                  @RequestParam String decision,
+                                  @RequestParam String comments,
+                                  RedirectAttributes redirectAttributes,
+                                  HttpSession session) {
+
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("DIRECTOR")) {
+            return "redirect:/login";
+        }
+
+        if (decision.equals("approve")) {
+            phdRegistrationService.directorApprove(id, comments);
+            redirectAttributes.addFlashAttribute("success", "Application approved! Admin notified.");
+        } else {
+            phdRegistrationService.directorReject(id, comments);
+            redirectAttributes.addFlashAttribute("success", "Application rejected. Student notified.");
+        }
+
+        return "redirect:/dashboard";
+    }
+
+    // Admin approval page
+    @GetMapping("/admin/review/{id}")
+    public String showAdminReview(@PathVariable Long id, Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
+
+        if (registration == null || !registration.getStatus().equals("DIRECTOR_APPROVED")) {
+            return "redirect:/dashboard";
+        }
+
+        model.addAttribute("registration", registration);
+        model.addAttribute("user", currentUser);
+        return "admin-review";
+    }
+
+    // Process admin final approval
+    @PostMapping("/admin/approve/{id}")
+    public String adminApprove(@PathVariable Long id,
+                               @RequestParam String decision,
+                               @RequestParam String comments,
+                               RedirectAttributes redirectAttributes,
+                               HttpSession session) {
+
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        if (decision.equals("approve")) {
+            phdRegistrationService.adminApprove(id, comments);
+            redirectAttributes.addFlashAttribute("success", "Application FINALLY APPROVED! Student notified.");
+        } else {
+            phdRegistrationService.adminReject(id, comments);
+            redirectAttributes.addFlashAttribute("success", "Application rejected. Student notified.");
+        }
+
+        return "redirect:/dashboard";
+    }
+
     @GetMapping("/registration/{id}")
     public String viewRegistration(@PathVariable Long id, Model model, HttpSession session) {
         PhDRegistration registration = phdRegistrationService.getRegistrationById(id);

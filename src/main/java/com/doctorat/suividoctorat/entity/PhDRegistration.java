@@ -6,6 +6,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "phd_registrations")
 public class PhDRegistration {
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_DIRECTOR_APPROVED = "DIRECTOR_APPROVED";
+    public static final String STATUS_DIRECTOR_REJECTED = "DIRECTOR_REJECTED";
+    public static final String STATUS_ADMIN_APPROVED = "APPROVED";
+    public static final String STATUS_ADMIN_REJECTED = "REJECTED";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,6 +3,7 @@ package com.doctorat.suividoctorat.service;
 import com.doctorat.suividoctorat.entity.PhDRegistration;
 import com.doctorat.suividoctorat.entity.User;
 import com.doctorat.suividoctorat.repository.PhDRegistrationRepository;
+import com.doctorat.suividoctorat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,12 @@ public class PhDRegistrationService {
 
     @Autowired
     private PhDRegistrationRepository registrationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -54,7 +61,7 @@ public class PhDRegistrationService {
         }
 
         registration.setSubmissionDate(LocalDateTime.now());
-        registration.setStatus("PENDING");
+        registration.setStatus(PhDRegistration.STATUS_PENDING);
 
         return registrationRepository.save(registration);
     }
@@ -106,10 +113,100 @@ public class PhDRegistrationService {
 
     // Get all pending registrations (for admin/director)
     public List<PhDRegistration> getPendingRegistrations() {
-        return registrationRepository.findByStatus("PENDING");
+        return registrationRepository.findByStatus(PhDRegistration.STATUS_PENDING);
     }
 
     public List<PhDRegistration> getRegistrationsByDirector(String directorName) {
         return registrationRepository.findByDirectorName(directorName);
+    }
+
+    // ===== APPROVAL WORKFLOW METHODS =====
+
+    // Director approves application
+    public PhDRegistration directorApprove(Long id, String feedback) {
+        PhDRegistration registration = getRegistrationById(id);
+        if (registration != null && registration.getStatus().equals(PhDRegistration.STATUS_PENDING)) {
+            registration.setStatus(PhDRegistration.STATUS_DIRECTOR_APPROVED);
+            registration.setDirectorFeedback(feedback);
+            registration.setDirectorApprovalDate(LocalDateTime.now());
+
+            PhDRegistration saved = registrationRepository.save(registration);
+
+            // Send email to student
+            emailService.sendDirectorDecisionNotification(registration, "APPROVED", feedback);
+
+            // Find admin users and notify them
+            List<User> admins = userRepository.findByRole("ADMIN");
+            for (User admin : admins) {
+                emailService.sendAdminNotification(registration, admin);
+            }
+
+            return saved;
+        }
+        return null;
+    }
+
+    // Director rejects application
+    public PhDRegistration directorReject(Long id, String feedback) {
+        PhDRegistration registration = getRegistrationById(id);
+        if (registration != null && registration.getStatus().equals(PhDRegistration.STATUS_PENDING)) {
+            registration.setStatus(PhDRegistration.STATUS_DIRECTOR_REJECTED);
+            registration.setDirectorFeedback(feedback);
+            registration.setDirectorApprovalDate(LocalDateTime.now());
+
+            PhDRegistration saved = registrationRepository.save(registration);
+
+            // Send email to student
+            emailService.sendDirectorDecisionNotification(registration, "REJECTED", feedback);
+
+            return saved;
+        }
+        return null;
+    }
+
+    // Admin final approval
+    public PhDRegistration adminApprove(Long id, String feedback) {
+        PhDRegistration registration = getRegistrationById(id);
+        if (registration != null && registration.getStatus().equals(PhDRegistration.STATUS_DIRECTOR_APPROVED)) {
+            registration.setStatus(PhDRegistration.STATUS_ADMIN_APPROVED);
+            registration.setAdminFeedback(feedback);
+            registration.setAdminApprovalDate(LocalDateTime.now());
+
+            PhDRegistration saved = registrationRepository.save(registration);
+
+            // Send final decision email to student
+            emailService.sendFinalDecisionNotification(registration, "APPROVED", feedback);
+
+            return saved;
+        }
+        return null;
+    }
+
+    // Admin final rejection
+    public PhDRegistration adminReject(Long id, String feedback) {
+        PhDRegistration registration = getRegistrationById(id);
+        if (registration != null && registration.getStatus().equals(PhDRegistration.STATUS_DIRECTOR_APPROVED)) {
+            registration.setStatus(PhDRegistration.STATUS_ADMIN_REJECTED);
+            registration.setAdminFeedback(feedback);
+            registration.setAdminApprovalDate(LocalDateTime.now());
+
+            PhDRegistration saved = registrationRepository.save(registration);
+
+            // Send final decision email to student
+            emailService.sendFinalDecisionNotification(registration, "REJECTED", feedback);
+
+            return saved;
+        }
+        return null;
+    }
+
+    // Get registrations by status (for admin/director filtering)
+    public List<PhDRegistration> getRegistrationsByStatus(String status) {
+        return registrationRepository.findByStatus(status);
+    }
+
+    // Get director approved registrations (for admin)
+    public List<PhDRegistration> getDirectorApprovedRegistrations() {
+        return registrationRepository.findByStatus(PhDRegistration.STATUS_DIRECTOR_APPROVED);
     }
 }

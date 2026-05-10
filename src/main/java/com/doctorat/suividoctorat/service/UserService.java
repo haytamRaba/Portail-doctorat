@@ -53,7 +53,9 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
-
+    public User findByFullName(String fullName) {
+        return userRepository.findByFullName(fullName).orElse(null);
+    }
     public boolean checkLogin(String email, String rawPassword) {
         User user = findByEmail(email);
         if (user == null) {
