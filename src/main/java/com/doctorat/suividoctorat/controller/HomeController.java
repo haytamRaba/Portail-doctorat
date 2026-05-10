@@ -148,18 +148,30 @@ public class HomeController {
         List<PhDRegistration> registrations = new ArrayList<>();
         model.addAttribute("user", currentUser);
 
-        //  based on role
         if (currentUser.getRole().equals("DOCTORANT")) {
+            Campaign activeCampaign = campaignService.getCurrentActiveCampaign();
+            model.addAttribute("activeCampaign", activeCampaign);
+
+            // Calculate campaign progress percentage for countdown timer
+            if (activeCampaign != null) {
+                LocalDateTime now = LocalDateTime.now();
+                long totalDuration = java.time.Duration.between(activeCampaign.getStartDate(), activeCampaign.getEndDate()).toMillis();
+                long elapsed = java.time.Duration.between(activeCampaign.getStartDate(), now).toMillis();
+                int percent = (int) Math.min(100, Math.max(0, (elapsed * 100) / totalDuration));
+                model.addAttribute("campaignProgressPercent", percent);
+            }
+
+            // Get doctorant's registrations
             registrations = phdRegistrationService.getRegistrationsByDoctorant(currentUser);
             model.addAttribute("registrations", registrations);
+
         } else if (currentUser.getRole().equals("DIRECTOR")) {
             model.addAttribute("registrations",
                     phdRegistrationService.getRegistrationsByDirector(currentUser.getFullName()));
         } else if (currentUser.getRole().equals("ADMIN")) {
             model.addAttribute("registrations",
                     phdRegistrationService.getPendingRegistrations());
-        }
-        else{
+        } else {
             model.addAttribute("registrations", new ArrayList<>());
         }
 

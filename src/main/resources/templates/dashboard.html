@@ -152,6 +152,37 @@
 
     <!-- DOCTORANT -->
     <div th:if="${user.role == 'DOCTORANT'}">
+        <div class="card" th:if="${activeCampaign != null}">
+            <h3>📢 Active Registration Campaign</h3>
+            <p><strong th:text="${activeCampaign.name}">Campaign Name</strong></p>
+            <p th:text="${activeCampaign.description}">Description</p>
+            <div class="progress-section">
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span>⏰ Time Remaining</span>
+                        <span th:text="${activeCampaign.timeRemaining}">Days remaining</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar progress-green"
+                             th:style="'width: ' + ${campaignProgressPercent} + '%'"
+                             th:text="${campaignProgressPercent} + '%'">
+                            0%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p><strong>Deadline:</strong> <span th:text="${#temporals.format(activeCampaign.endDate, 'dd/MM/yyyy HH:mm')}">End date</span></p>
+            <a href="/doctorant/register-phd" class="btn">Submit Application Now</a>
+        </div>
+
+        <div class="card" th:if="${activeCampaign == null}">
+            <h3>📢 No Active Campaign</h3>
+            <p>There is no active registration campaign at this time.</p>
+            <p>Please check back later or contact the administration.</p>
+        </div>
+    </div>
+
+    <div th:if="${user.role == 'DOCTORANT'}">
 
         <div class="card">
             <h3>Thesis Defense Prerequisites</h3>
