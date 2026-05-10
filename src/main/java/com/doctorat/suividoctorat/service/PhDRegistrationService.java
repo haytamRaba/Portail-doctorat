@@ -38,13 +38,11 @@ public class PhDRegistrationService {
                                             MultipartFile cvFile,
                                             MultipartFile additionalFile) throws IOException {
 
-        // Create upload directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Save files with unique names
         if (diplomaFile != null && !diplomaFile.isEmpty()) {
             String diplomaFileName = saveFile(diplomaFile, "diploma_");
             registration.setDiplomaFilePath(diplomaFileName);
@@ -66,7 +64,6 @@ public class PhDRegistrationService {
         return registrationRepository.save(registration);
     }
 
-    // Helper method to save file
     private String saveFile(MultipartFile file, String prefix) throws IOException {
         String originalFileName = file.getOriginalFilename();
         String fileExtension = "";
@@ -82,12 +79,10 @@ public class PhDRegistrationService {
         return uniqueFileName;
     }
 
-    // Get all registrations for a user
     public List<PhDRegistration> getRegistrationsByDoctorant(User doctorant) {
         return registrationRepository.findByDoctorant(doctorant);
     }
 
-    // Get registration by ID
     public PhDRegistration getRegistrationById(Long id) {
         return registrationRepository.findById(id).orElse(null);
     }
@@ -204,8 +199,9 @@ public class PhDRegistrationService {
     public List<PhDRegistration> getRegistrationsByStatus(String status) {
         return registrationRepository.findByStatus(status);
     }
-
-    // Get director approved registrations (for admin)
+    public List<PhDRegistration> getAllRegistrations() {
+        return registrationRepository.findAll();
+    }
     public List<PhDRegistration> getDirectorApprovedRegistrations() {
         return registrationRepository.findByStatus(PhDRegistration.STATUS_DIRECTOR_APPROVED);
     }
