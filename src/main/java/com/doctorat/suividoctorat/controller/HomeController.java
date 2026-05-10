@@ -2,10 +2,9 @@ package com.doctorat.suividoctorat.controller;
 
 import com.doctorat.suividoctorat.entity.PhDRegistration;
 import com.doctorat.suividoctorat.entity.User;
-import com.doctorat.suividoctorat.service.EmailService;
-import com.doctorat.suividoctorat.service.PhDRegistrationService;
-import com.doctorat.suividoctorat.service.UserService;
+import com.doctorat.suividoctorat.service.*;
 import jakarta.servlet.http.HttpServletRequest;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,9 +18,10 @@ import java.time.LocalDate;
 import com.doctorat.suividoctorat.dto.ProgressDTO;
 import com.doctorat.suividoctorat.entity.Publication;
 import com.doctorat.suividoctorat.entity.Training;
-import com.doctorat.suividoctorat.service.PrerequisiteService;
+import com.doctorat.suividoctorat.entity.Campaign;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +30,8 @@ public class HomeController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private CampaignService campaignService;
 
     @Autowired
     private PhDRegistrationService phdRegistrationService;
@@ -191,6 +193,18 @@ public class HomeController {
 
         if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
             return "redirect:/login";
+        }
+        if (!campaignService.canSubmitApplications()) {
+            Campaign activeCampaign = campaignService.getCurrentActiveCampaign();
+            if (activeCampaign == null) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No active registration campaign. Please contact administration.");
+            } else {
+                redirectAttributes.addFlashAttribute("error",
+                        "Registration is currently closed. The campaign ends on: " +
+                                activeCampaign.getEndDate());
+            }
+            return "redirect:/dashboard";
         }
 
         try {
@@ -477,6 +491,125 @@ public class HomeController {
         prerequisiteService.deleteTraining(id);
         redirectAttributes.addFlashAttribute("success", "Training deleted!");
         return "redirect:/doctorant/prerequisites";
+    }
+    @GetMapping("/admin/campaigns")
+    public String showCampaigns(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        List<Campaign> campaigns = campaignService.getAllCampaigns();
+        model.addAttribute("user", currentUser);
+        model.addAttribute("campaigns", campaigns);
+        return "admin-campaigns";
+    }
+    @GetMapping("/admin/campaigns/create")
+    public String showCreateCampaignForm(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("campaign", new Campaign());
+        return "admin-campaign-form";
+    }
+    @PostMapping("/admin/campaigns/create")
+    public String createCampaign(
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam(required = false) Integer maxApplications,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate.replace("T", " "));
+            LocalDateTime end = LocalDateTime.parse(endDate.replace("T", " "));
+
+            Campaign campaign = new Campaign(name, description, start, end);
+            campaign.setMaxApplications(maxApplications);
+            campaignService.createCampaign(campaign);
+
+            redirectAttributes.addFlashAttribute("success", "Campaign created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error creating campaign: " + e.getMessage());
+        }
+
+        return "redirect:/admin/campaigns";
+    }
+    @GetMapping("/admin/campaigns/edit/{id}")
+    public String showEditCampaignForm(@PathVariable Long id, Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        Campaign campaign = campaignService.getCampaignById(id);
+        if (campaign == null) {
+            return "redirect:/admin/campaigns";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("campaign", campaign);
+        return "admin-campaign-edit";
+    }
+    @PostMapping("/admin/campaigns/edit/{id}")
+    public String updateCampaign(
+            @PathVariable Long id,
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam String status,
+            @RequestParam(required = false) Integer maxApplications,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate.replace("T", " "));
+            LocalDateTime end = LocalDateTime.parse(endDate.replace("T", " "));
+
+            Campaign campaign = new Campaign(name, description, start, end);
+            campaign.setStatus(status);
+            campaign.setMaxApplications(maxApplications);
+
+            campaignService.updateCampaign(id, campaign);
+            redirectAttributes.addFlashAttribute("success", "Campaign updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error updating campaign: " + e.getMessage());
+        }
+
+        return "redirect:/admin/campaigns";
+    }
+    @GetMapping("/admin/campaigns/delete/{id}")
+    public String deleteCampaign(@PathVariable Long id, RedirectAttributes redirectAttributes, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        campaignService.deleteCampaign(id);
+        redirectAttributes.addFlashAttribute("success", "Campaign deleted!");
+        return "redirect:/admin/campaigns";
     }
 
     @GetMapping("/logout")
