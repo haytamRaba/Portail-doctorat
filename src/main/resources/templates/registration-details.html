@@ -155,6 +155,16 @@
         </div>
 
         <div class="card-body">
+
+            <div th:if="${registration.status == 'APPROVED'}">
+                <hr style="margin: 20px 0;">
+                <h3>Official Documents</h3>
+                <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
+                    <a th:href="@{/registration/{id}/certificate(id=${registration.id})}" class="btn">Download Registration Certificate</a>
+                    <a th:href="@{/registration/{id}/defense(id=${registration.id})}" class="btn">Download Defense Authorization</a>
+                </div>
+            </div>
+
             <div class="info-row">
                 <span class="info-label">Student Name:</span>
                 <span class="info-value" th:text="${registration.doctorant.fullName}">Student</span>

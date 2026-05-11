@@ -21,6 +21,10 @@ import com.doctorat.suividoctorat.entity.Training;
 import com.doctorat.suividoctorat.entity.Campaign;
 
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +44,87 @@ public class HomeController {
     private PrerequisiteService prerequisiteService;
     @Autowired
     private EmailService emailService;
-    
+
+    @Autowired
+    private PDFService pdfService;
+
+    @GetMapping("/registration/{id}/certificate")
+    public ResponseEntity<byte[]> downloadCertificate(@PathVariable Long id, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
+
+        if (registration == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean isAuthorized = currentUser.getRole().equals("ADMIN") ||
+                (currentUser.getRole().equals("DOCTORANT") && registration.getDoctorant().getId().equals(currentUser.getId()));
+
+        if (!isAuthorized) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (!registration.getStatus().equals("APPROVED")) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        byte[] pdfBytes = pdfService.generateRegistrationCertificate(registration);
+
+        if (pdfBytes == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "certificate_" + id + ".pdf");
+
+        return ResponseEntity.ok().headers(headers).body(pdfBytes);
+    }
+
+    @GetMapping("/registration/{id}/defense")
+    public ResponseEntity<byte[]> downloadDefenseAuthorization(@PathVariable Long id, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
+
+        if (registration == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean isAuthorized = currentUser.getRole().equals("ADMIN") ||
+                (currentUser.getRole().equals("DOCTORANT") && registration.getDoctorant().getId().equals(currentUser.getId()));
+
+        if (!isAuthorized) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (!registration.getStatus().equals("APPROVED")) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        byte[] pdfBytes = pdfService.generateDefenseAuthorization(registration);
+
+        if (pdfBytes == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "defense_auth_" + id + ".pdf");
+
+        return ResponseEntity.ok().headers(headers).body(pdfBytes);
+    }
+
+
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("message", " PhD Tracking Portal");
