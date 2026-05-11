@@ -27,7 +27,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class HomeController {
@@ -36,17 +38,92 @@ public class HomeController {
     private UserService userService;
     @Autowired
     private CampaignService campaignService;
-
     @Autowired
     private PhDRegistrationService phdRegistrationService;
-
     @Autowired
     private PrerequisiteService prerequisiteService;
     @Autowired
     private EmailService emailService;
-
     @Autowired
     private PDFService pdfService;
+    @Autowired
+    private OTPService otpService;
+
+    private Map<String, UserRegistrationData> tempRegistrationStorage = new HashMap<>();
+
+    private static class UserRegistrationData {
+        String email;
+        String password;
+        String fullName;
+        String role;
+
+        UserRegistrationData(String email, String password, String fullName, String role) {
+            this.email = email;
+            this.password = password;
+            this.fullName = fullName;
+            this.role = role;
+        }
+    }
+
+    @PostMapping("/register/send-otp")
+    @ResponseBody
+    public Map<String, String> sendOTP(@RequestParam String email,
+                                       @RequestParam String password,
+                                       @RequestParam String fullName,
+                                       @RequestParam String role) {
+
+        Map<String, String> response = new HashMap<>();
+
+        if (userService.emailExists(email)) {
+            response.put("status", "error");
+            response.put("message", "Email already registered");
+            return response;
+        }
+
+        String otp = otpService.generateOTP(email);
+        otpService.sendOTPEmail(email, otp);
+
+        tempRegistrationStorage.put(email, new UserRegistrationData(email, password, fullName, role));
+
+        response.put("status", "success");
+        response.put("message", "OTP sent to your email");
+        return response;
+    }
+
+    @PostMapping("/register/verify-otp")
+    @ResponseBody
+    public Map<String, String> verifyOTP(@RequestParam String email,
+                                         @RequestParam String otp) {
+
+        Map<String, String> response = new HashMap<>();
+
+        if (otpService.verifyOTP(email, otp)) {
+            UserRegistrationData data = tempRegistrationStorage.get(email);
+
+            if (data != null) {
+                String result = userService.registerUser(data.email, data.password, data.fullName, data.role);
+
+                if (result.equals("Registration successful!")) {
+                    tempRegistrationStorage.remove(email);
+                    response.put("status", "success");
+                    response.put("message", "Registration successful! Please login.");
+                } else {
+                    response.put("status", "error");
+                    response.put("message", result);
+                }
+            } else {
+                response.put("status", "error");
+                response.put("message", "Registration data expired. Please try again.");
+            }
+        } else {
+            response.put("status", "error");
+            response.put("message", "Invalid or expired OTP");
+        }
+
+        return response;
+    }
+
+
 
     @GetMapping("/registration/{id}/certificate")
     public ResponseEntity<byte[]> downloadCertificate(@PathVariable Long id, HttpSession session) {
@@ -209,30 +286,73 @@ public class HomeController {
 
         return user;
     }
-    @PostMapping("/login")
-    public String processLogin(
-            @RequestParam String email,
-            @RequestParam String password,
-            Model model,
-            HttpSession session) {
+    @GetMapping("/test-login")
+    @ResponseBody
+    public String testLogin(@RequestParam String email, @RequestParam String password) {
+        User user = userService.findByEmail(email);
 
-        System.out.println("=== PROCESS LOGIN ===");
-
-        if (userService.checkLogin(email, password)) {
-            User user = userService.findByEmail(email);
-
-            session.setAttribute("loggedUserId", user.getId());
-
-            System.out.println("User ID stored in session: " + user.getId());
-            System.out.println("Session ID: " + session.getId());
-
-            model.addAttribute("user", user);
-            return "dashboard";
-        } else {
-            model.addAttribute("error", "Invalid email or password");
-            return "login";
+        if (user == null) {
+            return "User not found: " + email;
         }
+
+        boolean match = userService.checkLogin(email, password);
+
+        return "User: " + email +
+                "\nFound in DB: true" +
+                "\nRole: " + user.getRole() +
+                "\nPassword matches: " + match +
+                "\nStored hash: " + user.getPassword();
     }
+//    @PostMapping("/login")
+//    public String processLogin(
+//            @RequestParam String email,
+//            @RequestParam String password,
+//            Model model,
+//            HttpSession session) {
+//
+//        System.out.println("=== PROCESS LOGIN ===");
+//
+//        if (userService.checkLogin(email, password)) {
+//            User user = userService.findByEmail(email);
+//
+//            session.setAttribute("loggedUserId", user.getId());
+//
+//            System.out.println("User ID stored in session: " + user.getId());
+//            System.out.println("Session ID: " + session.getId());
+//
+//            model.addAttribute("user", user);
+//            return "dashboard";
+//        } else {
+//            System.out.println("invalid email");
+//            model.addAttribute("error", "Invalid email or password");
+//            return "login";
+//        }
+//    }
+@PostMapping("/login")
+public String processLogin(
+        @RequestParam String email,
+        @RequestParam String password,
+        Model model,
+        HttpSession session) {
+
+    System.out.println("=== PROCESS LOGIN ===");
+    System.out.println("Email: " + email);
+
+    if (userService.checkLogin(email, password)) {
+        User user = userService.findByEmail(email);
+        session.setAttribute("loggedUserId", user.getId());
+
+        System.out.println("Login successful for: " + user.getEmail());
+        System.out.println("User role: " + user.getRole());
+        System.out.println("Redirecting to dashboard");
+
+        return "redirect:/dashboard";
+    } else {
+        System.out.println("Login failed for: " + email);
+        model.addAttribute("error", "Invalid email or password");
+        return "login";
+    }
+}
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
 

@@ -60,7 +60,8 @@ public class CampaignService {
 
     // Get current active campaign for doctorant view
     public Campaign getCurrentActiveCampaign() {
-        return campaignRepository.getCurrentActiveCampaign();
+        List<Campaign> activeCampaigns = campaignRepository.getCurrentActiveCampaigns();
+        return activeCampaigns.isEmpty() ? null : activeCampaigns.get(0);
     }
 
     // Delete campaign

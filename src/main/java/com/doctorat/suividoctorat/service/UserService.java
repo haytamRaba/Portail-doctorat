@@ -16,6 +16,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // Register a new user
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
     public String registerUser(String email, String password, String fullName, String role) {
 
         System.out.println("=== REGISTRATION ATTEMPT ===");

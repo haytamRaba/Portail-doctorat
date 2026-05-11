@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface CampaignRepository extends JpaRepository<Campaign, Long> {
 
-    @Query("SELECT c FROM Campaign c WHERE c.status = 'ACTIVE' AND c.startDate <= CURRENT_TIMESTAMP AND c.endDate >= CURRENT_TIMESTAMP")
+    @Query("SELECT c FROM Campaign c WHERE c.status = 'ACTIVE' AND c.startDate <= CURRENT_TIMESTAMP AND c.endDate >= CURRENT_TIMESTAMP ORDER BY c.endDate ASC")
     List<Campaign> findActiveCampaigns();
 
     @Query("SELECT c FROM Campaign c WHERE c.startDate > CURRENT_TIMESTAMP")
@@ -21,6 +21,6 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     @Query("SELECT COUNT(c) > 0 FROM Campaign c WHERE c.status = 'ACTIVE' AND c.startDate <= CURRENT_TIMESTAMP AND c.endDate >= CURRENT_TIMESTAMP")
     boolean hasActiveCampaign();
 
-    @Query("SELECT c FROM Campaign c WHERE c.status = 'ACTIVE' AND c.startDate <= CURRENT_TIMESTAMP AND c.endDate >= CURRENT_TIMESTAMP")
-    Campaign getCurrentActiveCampaign();
+    @Query("SELECT c FROM Campaign c WHERE c.status = 'ACTIVE' AND c.startDate <= CURRENT_TIMESTAMP AND c.endDate >= CURRENT_TIMESTAMP ORDER BY c.endDate ASC")
+    List<Campaign> getCurrentActiveCampaigns();
 }
