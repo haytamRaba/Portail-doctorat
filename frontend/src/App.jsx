@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import { Link } from "react-router-dom";
 
 function App() {
     const [stats, setStats] = useState({
@@ -17,7 +18,7 @@ function App() {
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Fetch data from backend
+
     const fetchData = async () => {
         try {
             setRefreshing(true);
@@ -62,7 +63,7 @@ function App() {
     if (error) {
         return (
             <div className="error-container">
-                <h2>⚠️ Error</h2>
+                <h2>Error</h2>
                 <p>{error}</p>
                 <a href="/dashboard" className="btn">Return to Dashboard</a>
             </div>
@@ -72,15 +73,15 @@ function App() {
     return (
         <div className="App">
             <nav className="navbar">
-                <a href="/dashboard">Thymeleaf Dashboard</a>
-                <a href="/react-dashboard" className="active">React Dashboard</a>
+                <Link to="localhost:8080/dashboard">Thymeleaf Dashboard</Link>
+                <a href="/react-dashboard" className="active">Dashboard</a>
                 <a href="/">Home</a>
                 <a href="/logout" style={{ float: 'right' }}>Logout</a>
             </nav>
 
             <div className="container">
                 <div className="welcome-card">
-                    <h1>📊 React Analytics Dashboard</h1>
+                    <h1> React Analytics Dashboard</h1>
                     <p>Welcome back, <strong>{stats.userName}</strong>! (Role: <span className="role-badge">{stats.userRole}</span>)</p>
                     <p>Real-time statistics about PhD applications</p>
                 </div>

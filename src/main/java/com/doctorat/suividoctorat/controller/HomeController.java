@@ -90,6 +90,18 @@ public class HomeController {
                 "\nUser from ID: " + (user != null ? user.getEmail() : "null") +
                 "\nUser role: " + (user != null ? user.getRole() : "null");
     }
+    // React Dashboard page
+    @GetMapping("/react-dashboard")
+    public String reactDashboard(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", currentUser);
+        return "react-dashboard";
+    }
     @GetMapping("/login")
     public String showLoginForm() {
         return "login";
