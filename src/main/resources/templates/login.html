@@ -65,8 +65,17 @@
             text-decoration: none;
         }
     </style>
+    <link rel="stylesheet" th:href="@{/css/institutional.css}">
 </head>
 <body>
+<nav class="navbar app-navbar public-navbar">
+    <a class="nav-brand" th:href="@{/}">Suivi Doctoral</a>
+    <div class="nav-section">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/register}">Create Account</a>
+        <a th:href="@{/login}">Login</a>
+    </div>
+</nav>
 <div class="container">
     <h2>Login to PhD Portal</h2>
 

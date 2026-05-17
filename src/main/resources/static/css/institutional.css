@@ -1,0 +1,641 @@
+:root {
+    --gov-navy: #5c4f4a;
+    --gov-navy-2: #5c766d;
+    --gov-blue: #c9996b;
+    --gov-gold: #c9996b;
+    --gov-burgundy: #ff0000;
+    --ink: #5c4f4a;
+    --muted: #5c766d;
+    --line: #bbd5da;
+    --surface: #f5f5f5;
+    --surface-2: #dff1f1;
+    --success: #5c766d;
+    --warning: #c9996b;
+    --danger: #ff0000;
+    --shadow: 0 12px 28px rgba(92, 79, 74, 0.12);
+}
+
+body.role-doctorant {
+    --gov-navy: #5c4f4a;
+    --gov-navy-2: #5c766d;
+    --gov-blue: #bbd5da;
+    --gov-gold: #bbd5da;
+    --ink: #5c4f4a;
+    --muted: #5c766d;
+    --line: #bbd5da;
+    --surface: #f5f5f5;
+    --surface-2: #dff1f1;
+}
+
+body.role-director {
+    --gov-navy: #5c4f4a;
+    --gov-navy-2: #5c766d;
+    --gov-blue: #c9996b;
+    --gov-gold: #c9996b;
+    --ink: #5c4f4a;
+    --muted: #5c766d;
+    --line: #c9996b;
+    --surface: #ede9e6;
+    --surface-2: #ede9e6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--surface-2);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    min-height: 100vh;
+    color: var(--ink) !important;
+    background: var(--surface-2) !important;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif !important;
+    line-height: 1.55;
+}
+
+body::before {
+    content: "Royaume du Maroc - Espace Doctoral";
+    display: block;
+    padding: 9px 24px;
+    color: rgba(255,255,255,0.88);
+    background: var(--gov-navy);
+    border-bottom: 3px solid var(--gov-gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.navbar {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 28px !important;
+    background: var(--gov-navy) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 12px 30px rgba(16, 35, 63, 0.18) !important;
+    overflow: visible !important;
+}
+
+.navbar::before {
+    content: "Suivi Doctoral";
+    margin-right: 22px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.navbar a {
+    float: none !important;
+    color: rgba(255,255,255,0.9) !important;
+    border: 1px solid transparent;
+    border-radius: 4px !important;
+    padding: 9px 13px !important;
+    font-size: 14px;
+    font-weight: 650;
+    text-decoration: none !important;
+}
+.app-navbar {
+    row-gap: 10px;
+}
+
+.app-navbar::before {
+    content: none !important;
+}
+
+.nav-brand {
+    display: inline-flex !important;
+    align-items: center;
+    min-height: 42px;
+    margin-right: 10px;
+    color: #fff !important;
+    font-size: 19px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.nav-brand::before {
+    content: "";
+    width: 10px;
+    height: 28px;
+    margin-right: 12px;
+    background: var(--gov-gold);
+    border-radius: 2px;
+}
+
+.nav-section,
+.nav-account {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-section {
+    padding: 5px 8px;
+    border-left: 1px solid rgba(255,255,255,0.14);
+}
+
+.nav-group-label {
+    color: rgba(255,255,255,0.58);
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nav-account {
+    margin-left: auto;
+    justify-content: flex-end;
+}
+
+.nav-user {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.nav-role {
+    color: #f5f5f5;
+    background: var(--gov-navy);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+}
+
+.nav-role.role-doctorant {
+    background: #ff0000;
+    color: #f5f5f5;
+}
+
+.nav-role.role-director {
+    background: #5c4f4a;
+    color: #ede9e6;
+}
+
+.nav-logout {
+    margin-left: 0 !important;
+    background: rgba(138,31,53,0.92) !important;
+    border-color: rgba(255,255,255,0.18) !important;
+}
+
+.public-navbar .nav-section {
+    margin-left: auto;
+}
+
+.navbar a:hover,
+.navbar a.active {
+    color: #fff !important;
+    background: rgba(255,255,255,0.12) !important;
+    border-color: rgba(255,255,255,0.22);
+}
+
+.navbar a[href="/logout"],
+.navbar a[href$="/logout"] {
+    margin-left: auto;
+    background: rgba(138,31,53,0.92) !important;
+    border-color: rgba(255,255,255,0.18);
+}
+
+.container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body:has(.navbar) .container {
+    max-width: 1180px !important;
+}
+
+body .container:has(input[type="password"]),
+body .container:has(#otp),
+body .container:has(#registerForm) {
+    max-width: 520px !important;
+}
+
+body:not(:has(.navbar)) > .container {
+    max-width: 920px !important;
+}
+
+body:not(:has(.navbar)) > .container:has(input[type="password"]),
+body:not(:has(.navbar)) > .container:has(#otp),
+body:not(:has(.navbar)) > .container:has(#registerForm) {
+    max-width: 520px !important;
+}
+
+.container > h1,
+.container > h2,
+.header h1,
+.card-header h1,
+.welcome-card h1 {
+    color: var(--gov-navy) !important;
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: 0;
+}
+
+.container > h1,
+.header h1,
+.card-header h1,
+.welcome-card h1 {
+    font-size: clamp(28px, 4vw, 46px) !important;
+    line-height: 1.08;
+}
+
+.container > h2,
+.user-info h2,
+.card h2,
+.card h3,
+.form-section h2,
+.header h2 {
+    color: var(--gov-navy) !important;
+    letter-spacing: 0;
+}
+
+.container,
+.card,
+.user-info,
+.form-section,
+.welcome-card,
+.error-container {
+    border-radius: 6px !important;
+}
+
+.container:has(> form),
+body > .container:not(:has(.card)):not(:has(.navbar)) {
+    border-top: 5px solid var(--gov-gold);
+}
+
+.card,
+.user-info,
+.form-section,
+.welcome-card,
+.error-container,
+body > .container {
+    background: var(--surface) !important;
+    border: 1px solid var(--line) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+.card,
+.user-info,
+.form-section,
+.welcome-card {
+    padding: 24px !important;
+    margin-bottom: 22px !important;
+}
+
+.header,
+.card-header {
+    border-bottom: 1px solid var(--line) !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 22px !important;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+p,
+li,
+.info-text,
+.info-value,
+td {
+    color: var(--muted);
+}
+
+strong,
+.info-label,
+th {
+    color: var(--ink) !important;
+}
+
+a {
+    color: var(--gov-blue) !important;
+    font-weight: 650;
+}
+
+.message,
+.alert,
+.error,
+.success {
+    border-radius: 4px !important;
+    border-left: 4px solid currentColor;
+    padding: 14px 16px !important;
+    font-weight: 650;
+}
+
+.message {
+    color: var(--gov-navy) !important;
+    background: #e9f0f8 !important;
+}
+
+.alert-success,
+.success {
+    color: var(--success) !important;
+    background: #eaf5ef !important;
+    border-color: #b7d9c5 !important;
+}
+
+.alert-error,
+.error {
+    color: var(--danger) !important;
+    background: #fbebee !important;
+    border-color: #efbcc6 !important;
+}
+
+form {
+    display: grid;
+    gap: 16px;
+}
+
+.form-group {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 16px !important;
+}
+
+label {
+    color: var(--ink) !important;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    min-height: 43px;
+    color: var(--ink) !important;
+    background: #fff !important;
+    border: 1px solid #c8d1dd !important;
+    border-radius: 4px !important;
+    padding: 10px 12px !important;
+    margin: 0 !important;
+    font: inherit;
+}
+
+textarea {
+    min-height: 130px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 3px solid rgba(31, 93, 143, 0.16);
+    border-color: var(--gov-blue) !important;
+}
+
+button,
+.btn,
+.btn-sm,
+.btn-back,
+.btn-secondary,
+.btn-refresh,
+input[type="submit"] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    color: #fff !important;
+    background: var(--gov-blue) !important;
+    border: 1px solid var(--gov-blue) !important;
+    border-radius: 4px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    line-height: 1.2;
+    text-decoration: none !important;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(31, 93, 143, 0.18);
+}
+
+button:hover,
+.btn:hover,
+.btn-sm:hover,
+.btn-back:hover,
+.btn-secondary:hover,
+.btn-refresh:hover {
+    background: var(--gov-navy-2) !important;
+    border-color: var(--gov-navy-2) !important;
+}
+
+.btn-back {
+    color: var(--gov-navy) !important;
+    background: #fff !important;
+    border-color: var(--line) !important;
+    box-shadow: none;
+}
+
+.btn-success,
+button[type="submit"] {
+    background: var(--gov-navy) !important;
+    border-color: var(--gov-navy) !important;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    margin-top: 16px !important;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+
+th,
+td {
+    padding: 13px 14px !important;
+    border-bottom: 1px solid var(--line) !important;
+    vertical-align: top;
+}
+
+th {
+    background: #edf2f7 !important;
+    font-size: 12px;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+tr:last-child td {
+    border-bottom: 0 !important;
+}
+
+tr:hover {
+    background: #f8fafc !important;
+}
+
+.status,
+.role-badge,
+.badge,
+.requirement-badge {
+    display: inline-flex !important;
+    align-items: center;
+    width: fit-content;
+    min-height: 26px;
+    border-radius: 999px !important;
+    padding: 5px 11px !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.status-PENDING,
+.status-UPCOMING {
+    background: var(--warning) !important;
+}
+
+.status-APPROVED,
+.status-ACTIVE,
+.status-DIRECTOR_APPROVED,
+.status-COMPLETED {
+    background: var(--success) !important;
+}
+
+.status-REJECTED,
+.status-CLOSED,
+.status-DIRECTOR_REJECTED {
+    background: var(--danger) !important;
+}
+
+.progress-bar-container {
+    height: 18px !important;
+    border-radius: 999px !important;
+    background: #dfe7f0 !important;
+}
+
+.progress-bar {
+    border-radius: 999px;
+    background: var(--gov-blue) !important;
+}
+
+.footer,
+.link,
+.action-buttons,
+.form-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.footer p,
+.link p {
+    margin: 0 !important;
+}
+
+.footer a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 9px 15px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--gov-navy) !important;
+    text-decoration: none !important;
+}
+
+.footer a:hover {
+    color: #fff !important;
+    background: var(--gov-blue);
+    border-color: var(--gov-blue);
+}
+
+.empty-message {
+    color: var(--muted) !important;
+    background: #f8fafc;
+    border: 1px dashed #c8d1dd;
+    border-radius: 6px;
+    padding: 28px !important;
+}
+
+@media (max-width: 900px) {
+    .nav-account,
+    .public-navbar .nav-section {
+        margin-left: 0;
+    }
+
+    .nav-brand,
+    .nav-section,
+    .nav-account {
+        flex-basis: 100%;
+    }
+
+    .nav-section {
+        border-left: 0;
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    body::before {
+        padding-inline: 14px;
+        font-size: 11px;
+    }
+
+    .navbar {
+        padding: 12px 14px !important;
+    }
+
+    .navbar::before {
+        flex-basis: 100%;
+        margin-right: 0;
+    }
+
+    .navbar a[href="/logout"],
+    .navbar a[href$="/logout"] {
+        margin-left: 0;
+    }
+
+    .container {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .card,
+    .user-info,
+    .form-section,
+    .welcome-card,
+    body > .container {
+        padding: 18px !important;
+    }
+
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

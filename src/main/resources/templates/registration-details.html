@@ -140,12 +140,39 @@
             border: 1px solid #c3e6cb;
         }
     </style>
+    <link rel="stylesheet" th:href="@{/css/institutional.css}">
 </head>
-<body>
-<div class="navbar">
-    <a href="/dashboard">Dashboard</a>
-    <a href="/">Home</a>
-</div>
+<body th:classappend="${user != null} ? (${user.role == 'DOCTORANT'} ? 'role-doctorant' : (${user.role == 'DIRECTOR'} ? 'role-director' : '')) : ''">
+<nav class="navbar app-navbar">
+    <a class="nav-brand" th:href="@{/dashboard}">Suivi Doctoral</a>
+    <div class="nav-section">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/react-dashboard}">Analytics</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'DOCTORANT'}">
+        <span class="nav-group-label">Doctorant</span>
+        <a th:href="@{/doctorant/register-phd}">New PhD Application</a>
+        <a th:href="@{/doctorant/prerequisites}">Defense Prerequisites</a>
+        <a th:href="@{/doctorant/add-publication}">Add Publication</a>
+        <a th:href="@{/doctorant/add-training}">Add Training</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'DIRECTOR'}">
+        <span class="nav-group-label">Director</span>
+        <a th:href="@{/dashboard}">Applications to Review</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
+        <span class="nav-group-label">Administration</span>
+        <a th:href="@{/dashboard}">Final Approvals</a>
+        <a th:href="@{/admin/campaigns}">Campaigns</a>
+        <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
+    </div>
+    <div class="nav-account">
+        <span class="nav-user" th:if="${user != null}" th:text="${user.fullName}">User</span>
+            <span class="nav-role" th:if="${user != null}" th:classappend="${user.role == 'DOCTORANT'} ? ' role-doctorant' : (${user.role == 'DIRECTOR'} ? ' role-director' : '')" th:text="${user.role}">ROLE</span>
+        <a class="nav-logout" th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
 
 <div class="container">
     <div class="card">
@@ -193,3 +220,4 @@
     </div>
 </div>
 </body></html>
+

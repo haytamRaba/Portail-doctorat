@@ -168,35 +168,135 @@
         }
 
         .progress-green {
-            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            background: #5c766d;
         }
 
         .progress-orange {
-            background: linear-gradient(90deg, #e67e22, #f39c12);
+            background: #c9996b;
         }
 
         .progress-red {
-            background: linear-gradient(90deg, #c0392b, #e74c3c);
+            background: #ff0000;
+        }
+
+        .doctorant-timeline {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 12px;
+        }
+
+        .doctorant-timeline li {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: #f5f5f5;
+            border: 1px solid #bbd5da;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .step-badge {
+            min-width: 62px;
+            text-align: center;
+            color: #ffffff;
+            background: #5c766d;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 10px;
+        }
+
+        .step-content strong {
+            color: #5c4f4a;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .timeline-card {
+            overflow: hidden;
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .timeline-header h3 {
+            margin: 0;
+        }
+
+        .timeline-toggle-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #5c4f4a;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .timeline-chevron {
+            display: inline-block;
+            transition: transform 0.25s ease;
+        }
+
+        .timeline-card.is-open .timeline-chevron {
+            transform: rotate(180deg);
+        }
+
+        .timeline-body {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.25s ease;
+        }
+
+        .timeline-card.is-open .timeline-body {
+            max-height: 700px;
+            opacity: 1;
+            margin-top: 14px;
         }
     </style>
+    <link rel="stylesheet" th:href="@{/css/institutional.css}">
 </head>
 
-<body>
+<body th:classappend="${user != null} ? (${user.role == 'DOCTORANT'} ? 'role-doctorant' : (${user.role == 'DIRECTOR'} ? 'role-director' : '')) : ''">
 
-<div class="navbar">
-    <a th:href="@{/dashboard}">Dashboard</a>
-
-    <a th:if="${user.role == 'DOCTORANT'}" th:href="@{/doctorant/register-phd}">
-        New PhD Application
-    </a>
-
-    <a th:if="${user.role == 'ADMIN'}" th:href="@{/admin/campaigns}">
-        Manage Campaigns
-    </a>
-
-    <a th:href="@{/}">Home</a>
-    <a href="/logout" style="float: right;">Logout</a>
-</div>
+<nav class="navbar app-navbar">
+    <a class="nav-brand" th:href="@{/dashboard}">Suivi Doctoral</a>
+    <div class="nav-section">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/react-dashboard}">Analytics</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'DOCTORANT'}">
+        <span class="nav-group-label">Doctorant</span>
+        <a th:href="@{/doctorant/register-phd}">New PhD Application</a>
+        <a th:href="@{/doctorant/prerequisites}">Defense Prerequisites</a>
+        <a th:href="@{/doctorant/add-publication}">Add Publication</a>
+        <a th:href="@{/doctorant/add-training}">Add Training</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'DIRECTOR'}">
+        <span class="nav-group-label">Director</span>
+        <a th:href="@{/dashboard}">Applications to Review</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
+        <span class="nav-group-label">Administration</span>
+        <a th:href="@{/dashboard}">Final Approvals</a>
+        <a th:href="@{/admin/campaigns}">Campaigns</a>
+        <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
+    </div>
+    <div class="nav-account">
+        <span class="nav-user" th:if="${user != null}" th:text="${user.fullName}">User</span>
+            <span class="nav-role" th:if="${user != null}" th:classappend="${user.role == 'DOCTORANT'} ? ' role-doctorant' : (${user.role == 'DIRECTOR'} ? ' role-director' : '')" th:text="${user.role}">ROLE</span>
+        <a class="nav-logout" th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
 
 <div class="container">
 
@@ -211,16 +311,57 @@
 
     <!-- ===== DOCTORANT SECTION ===== -->
     <div th:if="${user.role == 'DOCTORANT'}">
+        <div class="card timeline-card" id="doctorantTimelineCard">
+            <div class="timeline-header" id="toggleTimelineBtn" role="button" tabindex="0" aria-expanded="false" aria-controls="timelineBody">
+                <h3>Doctorant Timeline</h3>
+                <span class="timeline-toggle-inline">
+                    <span id="timelineToggleText">Show Steps</span>
+                    <span class="timeline-chevron">▼</span>
+                </span>
+            </div>
+            <div class="timeline-body" id="timelineBody">
+                <ul class="doctorant-timeline">
+                    <li>
+                        <span class="step-badge">Step 1</span>
+                        <div class="step-content">
+                            <strong>Open Campaign & Register</strong>
+                            <span>Start your PhD application during an active campaign period.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-badge">Step 2</span>
+                        <div class="step-content">
+                            <strong>Complete Thesis File</strong>
+                            <span>Fill in your thesis subject and supervisor information, then submit.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-badge">Step 3</span>
+                        <div class="step-content">
+                            <strong>Follow Director Review</strong>
+                            <span>Track status updates and respond when corrections are requested.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-badge">Step 4</span>
+                        <div class="step-content">
+                            <strong>Prepare Defense Prerequisites</strong>
+                            <span>Add publications and trainings until eligibility is complete.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
         <!-- Active Campaign Card -->
         <div class="card" th:if="${activeCampaign != null}">
-            <h3>📢 Active Registration Campaign</h3>
+            <h3>Active Registration Campaign</h3>
             <p><strong th:text="${activeCampaign.name}">Campaign Name</strong></p>
             <p th:text="${activeCampaign.description}">Description</p>
             <div class="progress-section">
                 <div class="progress-item">
                     <div class="progress-label">
-                        <span>⏰ Time Remaining</span>
+                        <span>Time Remaining</span>
                         <span th:text="${activeCampaign.timeRemaining}">Days remaining</span>
                     </div>
                     <div class="progress-bar-container">
@@ -238,21 +379,21 @@
 
         <!-- No Active Campaign Message -->
         <div class="card" th:if="${activeCampaign == null}">
-            <h3>📢 No Active Registration Campaign</h3>
+            <h3>No Active Registration Campaign</h3>
             <p>There is no active registration campaign at this time.</p>
             <p>Please check back later or contact the administration.</p>
         </div>
 
         <!-- Prerequisites Card -->
         <div class="card">
-            <h3>📊 Thesis Defense Prerequisites</h3>
+            <h3>Thesis Defense Prerequisites</h3>
             <p>Track your progress toward defense eligibility: publications and training hours</p>
             <a href="/doctorant/prerequisites" class="btn">View Prerequisites</a>
         </div>
 
         <!-- My PhD Applications Card -->
         <div class="card">
-            <h3>📋 My PhD Applications</h3>
+            <h3>My PhD Applications</h3>
 
             <div th:if="${registrations == null or registrations.empty}">
                 <p>You haven't submitted any PhD applications yet.</p>
@@ -295,7 +436,7 @@
     <!-- ===== DIRECTOR SECTION ===== -->
     <div th:if="${user.role == 'DIRECTOR'}">
         <div class="card">
-            <h3>📋 Applications to Review</h3>
+            <h3>Applications to Review</h3>
 
             <div th:if="${registrations == null or registrations.empty}">
                 <p>No pending applications to review.</p>
@@ -333,7 +474,7 @@
     <!-- ===== ADMIN SECTION ===== -->
     <div th:if="${user.role == 'ADMIN'}">
         <div class="card">
-            <h3>📋 All Pending Applications (Director Approved)</h3>
+            <h3>All Pending Applications (Director Approved)</h3>
 
             <div th:if="${registrations == null or registrations.empty}">
                 <p>No pending applications for final approval.</p>
@@ -367,12 +508,38 @@
 
         <!-- Quick Admin Links -->
         <div class="card">
-            <h3>⚙️ Admin Actions</h3>
+            <h3>Admin Actions</h3>
             <a href="/admin/campaigns" class="btn">Manage Registration Campaigns</a>
         </div>
     </div>
 
 </div>
+
+<script>
+    (function () {
+        const toggleBtn = document.getElementById('toggleTimelineBtn');
+        const timelineCard = document.getElementById('doctorantTimelineCard');
+        const toggleText = document.getElementById('timelineToggleText');
+
+        if (!toggleBtn || !timelineCard || !toggleText) {
+            return;
+        }
+
+        function toggleTimeline() {
+            const isOpen = timelineCard.classList.toggle('is-open');
+            toggleText.textContent = isOpen ? 'Hide Steps' : 'Show Steps';
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        toggleBtn.addEventListener('click', toggleTimeline);
+        toggleBtn.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleTimeline();
+            }
+        });
+    })();
+</script>
 
 </body>
 </html>
