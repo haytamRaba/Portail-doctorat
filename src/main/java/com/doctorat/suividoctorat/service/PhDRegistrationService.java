@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -111,8 +112,21 @@ public class PhDRegistrationService {
         return registrationRepository.findByStatus(PhDRegistration.STATUS_PENDING);
     }
 
-    public List<PhDRegistration> getRegistrationsByDirector(String directorName) {
-        return registrationRepository.findByDirectorName(directorName);
+    public List<PhDRegistration> getRegistrationsByDirector(User director) {
+        if (director == null) {
+            return List.of();
+        }
+
+        List<PhDRegistration> byId = registrationRepository.findByDirectorUserId(director.getId());
+        List<PhDRegistration> byName = registrationRepository.findByDirectorNameNormalized(director.getFullName().trim());
+
+        List<PhDRegistration> merged = new ArrayList<>(byId);
+        for (PhDRegistration reg : byName) {
+            if (merged.stream().noneMatch(r -> r.getId().equals(reg.getId()))) {
+                merged.add(reg);
+            }
+        }
+        return merged;
     }
 
     // ===== APPROVAL WORKFLOW METHODS =====

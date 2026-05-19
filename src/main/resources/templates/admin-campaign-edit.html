@@ -129,7 +129,7 @@
     </div>
     <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
         <span class="nav-group-label">Administration</span>
-        <a th:href="@{/dashboard}">Final Approvals</a>
+        <a th:href="@{/admin/final-approvals}">Final Approvals</a>
         <a th:href="@{/admin/campaigns}">Campaigns</a>
         <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
     </div>
@@ -159,15 +159,15 @@
       </div>
 
       <div class="form-group">
-        <label>Start Date & Time *</label>
-        <input type="datetime-local" name="startDate"
-               th:value="${#temporals.format(campaign.startDate, 'yyyy-MM-dd\'T\'HH:mm')}" required>
+        <label>Start Date *</label>
+        <input type="date" name="startDate"
+               th:value="${#temporals.format(campaign.startDate, 'yyyy-MM-dd')}" required>
       </div>
 
       <div class="form-group">
-        <label>End Date & Time *</label>
-        <input type="datetime-local" name="endDate"
-               th:value="${#temporals.format(campaign.endDate, 'yyyy-MM-dd\'T\'HH:mm')}" required>
+        <label>End Date *</label>
+        <input type="date" name="endDate"
+               th:value="${#temporals.format(campaign.endDate, 'yyyy-MM-dd')}" required>
       </div>
 
       <div class="form-group">

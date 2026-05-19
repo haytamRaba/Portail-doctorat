@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Access Denied</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+            padding: 24px;
+        }
+        .box {
+            width: min(680px, 100%);
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 28px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 44px;
+        }
+        p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1>403</h1>
+    <p><strong>Access denied.</strong></p>
+    <p>This page has bouncer-level security, and your name is not on the list.</p>
+    <p>Try a different page or go back home.</p>
+    <a class="btn" th:href="@{/}" href="/">Take Me Home</a>
+</div>
+</body>
+</html>

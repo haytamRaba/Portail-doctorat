@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import com.doctorat.suividoctorat.dto.ProgressDTO;
 import com.doctorat.suividoctorat.entity.Publication;
@@ -383,14 +384,26 @@ public String processLogin(
 
         } else if (currentUser.getRole().equals("DIRECTOR")) {
             model.addAttribute("registrations",
-                    phdRegistrationService.getRegistrationsByDirector(currentUser.getFullName()));
+                    phdRegistrationService.getRegistrationsByDirector(currentUser));
         } else if (currentUser.getRole().equals("ADMIN")) {
             model.addAttribute("registrations",
-                    phdRegistrationService.getPendingRegistrations());
+                    phdRegistrationService.getDirectorApprovedRegistrations());
         } else {
             model.addAttribute("registrations", new ArrayList<>());
         }
 
+        return "dashboard";
+    }
+
+    @GetMapping("/admin/final-approvals")
+    public String showFinalApprovals(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("registrations", phdRegistrationService.getDirectorApprovedRegistrations());
         return "dashboard";
     }
 
@@ -401,6 +414,8 @@ public String processLogin(
         if (currentUser == null || !currentUser.getRole().equals("DOCTORANT")) {
             return "redirect:/login";
         }
+        model.addAttribute("user", currentUser);
+        model.addAttribute("directors", userService.findByRole("DIRECTOR"));
         model.addAttribute("registration", new PhDRegistration(currentUser, "", "", "", ""));
         return "phd-registration-form";
     }
@@ -409,7 +424,7 @@ public String processLogin(
     public String processPhDRegistration(
             @RequestParam String thesisSubject,
             @RequestParam String researchDomain,
-            @RequestParam String directorName,
+            @RequestParam Long directorId,
             @RequestParam(required = false) String coDirectorName,
             @RequestParam("diplomaFile") MultipartFile diplomaFile,
             @RequestParam("cvFile") MultipartFile cvFile,
@@ -436,16 +451,25 @@ public String processLogin(
         }
 
         try {
+            User director = userService.findUserById(directorId);
+            if (director == null || !"DIRECTOR".equals(director.getRole())) {
+                redirectAttributes.addFlashAttribute("error", "Selected director is invalid.");
+                return "redirect:/doctorant/register-phd";
+            }
+
             PhDRegistration registration = new PhDRegistration(
-                    currentUser, thesisSubject, researchDomain, directorName, coDirectorName
+                    currentUser,
+                    thesisSubject,
+                    researchDomain,
+                    director.getFullName().trim(),
+                    coDirectorName == null ? null : coDirectorName.trim()
             );
+            registration.setDirectorUserId(director.getId());
 
             // Save registration with files
             phdRegistrationService.saveRegistration(registration, diplomaFile, cvFile, additionalFile);
 
             // NOTIFY DIRECTOR
-            // Find director by name (simplified - you'd want by email in production)
-            User director = userService.findByFullName(directorName);
             if (director != null && director.getRole().equals("DIRECTOR")) {
                 emailService.sendDirectorNotification(registration, director);
                 redirectAttributes.addFlashAttribute("success",
@@ -473,7 +497,15 @@ public String processLogin(
 
         PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
 
-        if (registration == null || !registration.getDirectorName().equals(currentUser.getFullName())) {
+        boolean isOwnerById = registration != null &&
+                registration.getDirectorUserId() != null &&
+                registration.getDirectorUserId().equals(currentUser.getId());
+        boolean isOwnerByName = registration != null &&
+                registration.getDirectorName() != null &&
+                currentUser.getFullName() != null &&
+                registration.getDirectorName().trim().equalsIgnoreCase(currentUser.getFullName().trim());
+
+        if (registration == null || (!isOwnerById && !isOwnerByName)) {
             return "redirect:/dashboard";
         }
 
@@ -496,12 +528,26 @@ public String processLogin(
             return "redirect:/login";
         }
 
-        if (decision.equals("approve")) {
-            phdRegistrationService.directorApprove(id, comments);
-            redirectAttributes.addFlashAttribute("success", "Application approved! Admin notified.");
-        } else {
-            phdRegistrationService.directorReject(id, comments);
-            redirectAttributes.addFlashAttribute("success", "Application rejected. Student notified.");
+        try {
+            if ("approve".equalsIgnoreCase(decision)) {
+                PhDRegistration updated = phdRegistrationService.directorApprove(id, comments);
+                if (updated == null) {
+                    redirectAttributes.addFlashAttribute("error", "Unable to approve this application.");
+                } else {
+                    redirectAttributes.addFlashAttribute("success", "Application approved! Admin notified.");
+                }
+            } else if ("reject".equalsIgnoreCase(decision)) {
+                PhDRegistration updated = phdRegistrationService.directorReject(id, comments);
+                if (updated == null) {
+                    redirectAttributes.addFlashAttribute("error", "Unable to reject this application.");
+                } else {
+                    redirectAttributes.addFlashAttribute("success", "Application rejected. Student notified.");
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Invalid decision selected.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error while processing decision: " + e.getMessage());
         }
 
         return "redirect:/dashboard";
@@ -541,12 +587,26 @@ public String processLogin(
             return "redirect:/login";
         }
 
-        if (decision.equals("approve")) {
-            phdRegistrationService.adminApprove(id, comments);
-            redirectAttributes.addFlashAttribute("success", "Application FINALLY APPROVED! Student notified.");
-        } else {
-            phdRegistrationService.adminReject(id, comments);
-            redirectAttributes.addFlashAttribute("success", "Application rejected. Student notified.");
+        try {
+            if ("approve".equalsIgnoreCase(decision)) {
+                PhDRegistration updated = phdRegistrationService.adminApprove(id, comments);
+                if (updated == null) {
+                    redirectAttributes.addFlashAttribute("error", "Unable to approve this application.");
+                } else {
+                    redirectAttributes.addFlashAttribute("success", "Application FINALLY APPROVED! Student notified.");
+                }
+            } else if ("reject".equalsIgnoreCase(decision)) {
+                PhDRegistration updated = phdRegistrationService.adminReject(id, comments);
+                if (updated == null) {
+                    redirectAttributes.addFlashAttribute("error", "Unable to reject this application.");
+                } else {
+                    redirectAttributes.addFlashAttribute("success", "Application rejected. Student notified.");
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Invalid decision selected.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error while processing decision: " + e.getMessage());
         }
 
         return "redirect:/dashboard";
@@ -762,8 +822,13 @@ public String processLogin(
         }
 
         try {
-            LocalDateTime start = LocalDateTime.parse(startDate.replace("T", " "));
-            LocalDateTime end = LocalDateTime.parse(endDate.replace("T", " "));
+            LocalDateTime start = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+            LocalDateTime end = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE).atTime(23, 59, 59);
+
+            if (!end.isAfter(start)) {
+                redirectAttributes.addFlashAttribute("error", "End date must be after start date.");
+                return "redirect:/admin/campaigns/create";
+            }
 
             Campaign campaign = new Campaign(name, description, start, end);
             campaign.setMaxApplications(maxApplications);
@@ -812,8 +877,13 @@ public String processLogin(
         }
 
         try {
-            LocalDateTime start = LocalDateTime.parse(startDate.replace("T", " "));
-            LocalDateTime end = LocalDateTime.parse(endDate.replace("T", " "));
+            LocalDateTime start = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+            LocalDateTime end = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE).atTime(23, 59, 59);
+
+            if (!end.isAfter(start)) {
+                redirectAttributes.addFlashAttribute("error", "End date must be after start date.");
+                return "redirect:/admin/campaigns/edit/" + id;
+            }
 
             Campaign campaign = new Campaign(name, description, start, end);
             campaign.setStatus(status);

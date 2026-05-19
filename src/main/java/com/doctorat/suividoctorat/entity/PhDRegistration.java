@@ -29,6 +29,8 @@ public class PhDRegistration {
     @Column(nullable = false)
     private String directorName;
 
+    private Long directorUserId;
+
     private String coDirectorName;
 
     private String diplomaFilePath;
@@ -37,7 +39,9 @@ public class PhDRegistration {
 
     private String status; // PENDING, DIRECTOR_APPROVED, ADMIN_APPROVED, REJECTED
 
+    @Column(columnDefinition = "TEXT")
     private String directorFeedback;
+    @Column(columnDefinition = "TEXT")
     private String adminFeedback;
 
     // Timestamps
@@ -74,6 +78,9 @@ public class PhDRegistration {
     // == director name and co
     public String getDirectorName() { return directorName; }
     public void setDirectorName(String directorName) { this.directorName = directorName; }
+
+    public Long getDirectorUserId() { return directorUserId; }
+    public void setDirectorUserId(Long directorUserId) { this.directorUserId = directorUserId; }
 
     public String getCoDirectorName() { return coDirectorName; }
     public void setCoDirectorName(String coDirectorName) { this.coDirectorName = coDirectorName; }

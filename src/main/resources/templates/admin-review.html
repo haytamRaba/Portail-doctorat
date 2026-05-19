@@ -103,7 +103,7 @@
     </div>
     <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
         <span class="nav-group-label">Administration</span>
-        <a th:href="@{/dashboard}">Final Approvals</a>
+        <a th:href="@{/admin/final-approvals}">Final Approvals</a>
         <a th:href="@{/admin/campaigns}">Campaigns</a>
         <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
     </div>
@@ -147,7 +147,7 @@
                 <span th:text="${registration.coDirectorName}">Co-director</span>
             </div>
 
-            <form method="post">
+            <form method="post" th:action="@{/admin/approve/{id}(id=${registration.id})}">
                 <div class="form-group">
                     <label>Decision *</label>
                     <select name="decision" required>
@@ -163,7 +163,7 @@
                 </div>
 
                 <button type="submit">Submit Decision</button>
-                <a href="/dashboard" class="btn-back">Cancel</a>
+                <a href="/admin/final-approvals" class="btn-back">Cancel</a>
             </form>
         </div>
     </div>

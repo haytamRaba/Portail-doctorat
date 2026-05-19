@@ -147,7 +147,7 @@
     </div>
     <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
         <span class="nav-group-label">Administration</span>
-        <a th:href="@{/dashboard}">Final Approvals</a>
+        <a th:href="@{/admin/final-approvals}">Final Approvals</a>
         <a th:href="@{/admin/campaigns}">Campaigns</a>
         <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
     </div>
@@ -189,9 +189,13 @@
 
             <!-- Director Information -->
             <div class="form-group">
-                <label>Thesis Director Name *</label>
-                <input type="text" name="directorName" required
-                       placeholder="Full name of your thesis director">
+                <label>Thesis Director *</label>
+                <select name="directorId" required>
+                    <option value="">Select thesis director</option>
+                    <option th:each="director : ${directors}"
+                            th:value="${director.id}"
+                            th:text="${director.fullName + ' (' + director.email + ')'}">Director Name</option>
+                </select>
             </div>
 
             <div class="form-group">

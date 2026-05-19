@@ -7,6 +7,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -59,6 +61,11 @@ public class UserService {
     public User findByFullName(String fullName) {
         return userRepository.findByFullName(fullName).orElse(null);
     }
+
+    public List<User> findByRole(String role) {
+        return userRepository.findByRole(role);
+    }
+
     public boolean checkLogin(String email, String rawPassword) {
         User user = findByEmail(email);
         if (user == null) {

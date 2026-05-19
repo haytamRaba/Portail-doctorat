@@ -23,7 +23,7 @@ public class ApiController {
     @Autowired
     private UserService userService;
 
-    // Helper method to get current user
+
     private User getCurrentUser(HttpSession session) {
         Long userId = (Long) session.getAttribute("loggedUserId");
         if (userId == null) {

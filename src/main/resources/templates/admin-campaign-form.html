@@ -135,7 +135,7 @@
     </div>
     <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
         <span class="nav-group-label">Administration</span>
-        <a th:href="@{/dashboard}">Final Approvals</a>
+        <a th:href="@{/admin/final-approvals}">Final Approvals</a>
         <a th:href="@{/admin/campaigns}">Campaigns</a>
         <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
     </div>
@@ -167,15 +167,15 @@
       </div>
 
       <div class="form-group">
-        <label>Start Date & Time *</label>
-        <input type="datetime-local" name="startDate" required>
-        <div class="info-text">When doctorants can start submitting applications</div>
+        <label>Start Date *</label>
+        <input type="date" name="startDate" required>
+        <div class="info-text">Start time is set automatically to 00:00</div>
       </div>
 
       <div class="form-group">
-        <label>End Date & Time *</label>
-        <input type="datetime-local" name="endDate" required>
-        <div class="info-text">Deadline for submissions</div>
+        <label>End Date *</label>
+        <input type="date" name="endDate" required>
+        <div class="info-text">End time is set automatically to 23:59</div>
       </div>
 
       <div class="form-group">
