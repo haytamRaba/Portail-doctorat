@@ -1,0 +1,71 @@
+# Endpoints =
+
+Base URL (local): `http://localhost:8080`
+
+## API Controller (`/api`)
+
+1. `GET /api/stats`
+2. `GET /api/recent-applications`
+3. `GET /api/applications/status/{status}`
+
+## Home Controller
+
+### Auth / Registration
+
+1. `POST /register/send-otp`
+2. `POST /register/verify-otp`
+3. `GET /register`
+4. `POST /register`
+5. `GET /login`
+6. `POST /login`
+7. `GET /logout`
+8. `GET /check-session`
+9. `GET /test-login`
+
+### General Pages
+
+1. `GET /`
+2. `GET /dashboard`
+3. `GET /react-dashboard`
+
+### Registration / Documents
+
+1. `GET /registration/{id}`
+2. `POST /registration/{id}/approve`
+3. `GET /registration/{id}/certificate`
+4. `GET /registration/{id}/defense`
+
+### Director Review
+
+1. `GET /director/review/{id}`
+2. `POST /director/approve/{id}`
+
+### Admin Review / Certificates
+
+1. `GET /admin/final-approvals`
+2. `GET /admin/review/{id}`
+3. `POST /admin/approve/{id}`
+4. `GET /admin/certificates`
+
+### Doctorant
+
+1. `GET /doctorant/register-phd`
+2. `POST /doctorant/register-phd`
+3. `GET /doctorant/prerequisites`
+4. `GET /doctorant/add-publication`
+5. `POST /doctorant/add-publication`
+6. `GET /doctorant/add-training`
+7. `POST /doctorant/add-training`
+8. `GET /doctorant/delete-publication/{id}`
+9. `GET /doctorant/delete-training/{id}`
+
+### Campaign Management (Admin)
+
+1. `GET /admin/campaigns`
+2. `GET /admin/campaigns/create`
+3. `POST /admin/campaigns/create`
+4. `GET /admin/campaigns/edit/{id}`
+5. `POST /admin/campaigns/edit/{id}`
+6. `GET /admin/campaigns/delete/{id}`
+
+

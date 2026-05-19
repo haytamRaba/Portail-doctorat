@@ -136,6 +136,7 @@
     <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
         <span class="nav-group-label">Administration</span>
         <a th:href="@{/admin/final-approvals}">Final Approvals</a>
+        <a th:href="@{/admin/certificates}">Certificates</a>
         <a th:href="@{/admin/campaigns}">Campaigns</a>
         <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
     </div>

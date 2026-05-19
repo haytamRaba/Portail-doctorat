@@ -50,14 +50,14 @@ public class HomeController {
     @Autowired
     private OTPService otpService;
 
+    //_ prod
     private Map<String, UserRegistrationData> tempRegistrationStorage = new HashMap<>();
-
+    //_ prod
     private static class UserRegistrationData {
         String email;
         String password;
         String fullName;
         String role;
-
         UserRegistrationData(String email, String password, String fullName, String role) {
             this.email = email;
             this.password = password;
@@ -65,66 +65,6 @@ public class HomeController {
             this.role = role;
         }
     }
-
-    @PostMapping("/register/send-otp")
-    @ResponseBody
-    public Map<String, String> sendOTP(@RequestParam String email,
-                                       @RequestParam String password,
-                                       @RequestParam String fullName,
-                                       @RequestParam String role) {
-
-        Map<String, String> response = new HashMap<>();
-
-        if (userService.emailExists(email)) {
-            response.put("status", "error");
-            response.put("message", "Email already registered");
-            return response;
-        }
-
-        String otp = otpService.generateOTP(email);
-        otpService.sendOTPEmail(email, otp);
-
-        tempRegistrationStorage.put(email, new UserRegistrationData(email, password, fullName, role));
-
-        response.put("status", "success");
-        response.put("message", "OTP sent to your email");
-        return response;
-    }
-
-    @PostMapping("/register/verify-otp")
-    @ResponseBody
-    public Map<String, String> verifyOTP(@RequestParam String email,
-                                         @RequestParam String otp) {
-
-        Map<String, String> response = new HashMap<>();
-
-        if (otpService.verifyOTP(email, otp)) {
-            UserRegistrationData data = tempRegistrationStorage.get(email);
-
-            if (data != null) {
-                String result = userService.registerUser(data.email, data.password, data.fullName, data.role);
-
-                if (result.equals("Registration successful!")) {
-                    tempRegistrationStorage.remove(email);
-                    response.put("status", "success");
-                    response.put("message", "Registration successful! Please login.");
-                } else {
-                    response.put("status", "error");
-                    response.put("message", result);
-                }
-            } else {
-                response.put("status", "error");
-                response.put("message", "Registration data expired. Please try again.");
-            }
-        } else {
-            response.put("status", "error");
-            response.put("message", "Invalid or expired OTP");
-        }
-
-        return response;
-    }
-
-
 
     @GetMapping("/registration/{id}/certificate")
     public ResponseEntity<byte[]> downloadCertificate(@PathVariable Long id, HttpSession session) {
@@ -164,43 +104,7 @@ public class HomeController {
         return ResponseEntity.ok().headers(headers).body(pdfBytes);
     }
 
-    @GetMapping("/registration/{id}/defense")
-    public ResponseEntity<byte[]> downloadDefenseAuthorization(@PathVariable Long id, HttpSession session) {
-        User currentUser = getCurrentUser(session);
 
-        if (currentUser == null) {
-            return ResponseEntity.status(401).build();
-        }
-
-        PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
-
-        if (registration == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        boolean isAuthorized = currentUser.getRole().equals("ADMIN") ||
-                (currentUser.getRole().equals("DOCTORANT") && registration.getDoctorant().getId().equals(currentUser.getId()));
-
-        if (!isAuthorized) {
-            return ResponseEntity.status(403).build();
-        }
-
-        if (!registration.getStatus().equals("APPROVED")) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        byte[] pdfBytes = pdfService.generateDefenseAuthorization(registration);
-
-        if (pdfBytes == null) {
-            return ResponseEntity.internalServerError().build();
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "defense_auth_" + id + ".pdf");
-
-        return ResponseEntity.ok().headers(headers).body(pdfBytes);
-    }
 
 
     @GetMapping("/")
@@ -212,7 +116,7 @@ public class HomeController {
 
     @GetMapping("/register")
     public String showRegistrationForm() {
-        return "register";  // Show register.html
+        return "register";
     }
 
     @PostMapping("/register")
@@ -252,7 +156,7 @@ public class HomeController {
                 "\nUser from ID: " + (user != null ? user.getEmail() : "null") +
                 "\nUser role: " + (user != null ? user.getRole() : "null");
     }
-    // React Dashboard page
+
     @GetMapping("/react-dashboard")
     public String reactDashboard(Model model, HttpSession session) {
         User currentUser = getCurrentUser(session);
@@ -405,6 +309,18 @@ public String processLogin(
         model.addAttribute("user", currentUser);
         model.addAttribute("registrations", phdRegistrationService.getDirectorApprovedRegistrations());
         return "dashboard";
+    }
+
+    @GetMapping("/admin/certificates")
+    public String showAdminCertificates(Model model, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+        if (currentUser == null || !currentUser.getRole().equals("ADMIN")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("registrations", phdRegistrationService.getRegistrationsByStatus("APPROVED"));
+        return "admin-certificates";
     }
 
     @GetMapping("/doctorant/register-phd")
@@ -916,6 +832,100 @@ public String processLogin(
         return "redirect:/login";
     }
 
+    //_ prod
+    @PostMapping("/register/send-otp")
+    @ResponseBody
+    public Map<String, String> sendOTP(@RequestParam String email,
+                                       @RequestParam String password,
+                                       @RequestParam String fullName,
+                                       @RequestParam String role) {
 
+        Map<String, String> response = new HashMap<>();
+
+        if (userService.emailExists(email)) {
+            response.put("status", "error");
+            response.put("message", "Email already registered");
+            return response;
+        }
+
+        String otp = otpService.generateOTP(email);
+        otpService.sendOTPEmail(email, otp);
+
+        tempRegistrationStorage.put(email, new UserRegistrationData(email, password, fullName, role));
+
+        response.put("status", "success");
+        response.put("message", "OTP sent to your email");
+        return response;
+    }
+    //_ prod
+    @PostMapping("/register/verify-otp")
+    @ResponseBody
+    public Map<String, String> verifyOTP(@RequestParam String email,
+                                         @RequestParam String otp) {
+
+        Map<String, String> response = new HashMap<>();
+
+        if (otpService.verifyOTP(email, otp)) {
+            UserRegistrationData data = tempRegistrationStorage.get(email);
+
+            if (data != null) {
+                String result = userService.registerUser(data.email, data.password, data.fullName, data.role);
+
+                if (result.equals("Registration successful!")) {
+                    tempRegistrationStorage.remove(email);
+                    response.put("status", "success");
+                    response.put("message", "Registration successful! Please login.");
+                } else {
+                    response.put("status", "error");
+                    response.put("message", result);
+                }
+            } else {
+                response.put("status", "error");
+                response.put("message", "Registration data expired. Please try again.");
+            }
+        } else {
+            response.put("status", "error");
+            response.put("message", "Invalid or expired OTP");
+        }
+
+        return response;
+    }
+    @GetMapping("/registration/{id}/defense")
+    public ResponseEntity<byte[]> downloadDefenseAuthorization(@PathVariable Long id, HttpSession session) {
+        User currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        PhDRegistration registration = phdRegistrationService.getRegistrationById(id);
+
+        if (registration == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean isAuthorized = currentUser.getRole().equals("ADMIN") ||
+                (currentUser.getRole().equals("DOCTORANT") && registration.getDoctorant().getId().equals(currentUser.getId()));
+
+        if (!isAuthorized) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (!registration.getStatus().equals("APPROVED")) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        byte[] pdfBytes = pdfService.generateDefenseAuthorization(registration);
+
+        if (pdfBytes == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "defense_auth_" + id + ".pdf");
+
+        return ResponseEntity.ok().headers(headers).body(pdfBytes);
+    }
 
 }

@@ -46,7 +46,7 @@ public class ProgressDTO {
     public boolean isReadyForDefense() { return readyForDefense; }
     public void setReadyForDefense(boolean readyForDefense) { this.readyForDefense = readyForDefense; }
 
-    // Helper methods
+
     public int getArticlesRequired() { return 2; }
     public int getConferencesRequired() { return 2; }
     public int getTrainingHoursRequired() { return 200; }

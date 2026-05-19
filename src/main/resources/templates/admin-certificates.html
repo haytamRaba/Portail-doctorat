@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Certificates - PhD Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .navbar { background: #2c3e50; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+        .navbar a { color: white; text-decoration: none; padding: 10px 15px; display: inline-block; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { display: inline-block; padding: 8px 14px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/institutional.css}">
+</head>
+<body th:classappend="${user != null} ? (${user.role == 'DOCTORANT'} ? 'role-doctorant' : (${user.role == 'DIRECTOR'} ? 'role-director' : '')) : ''">
+<nav class="navbar app-navbar">
+    <a class="nav-brand" th:href="@{/dashboard}">Suivi Doctoral</a>
+    <div class="nav-section">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/react-dashboard}">Analytics</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'DOCTORANT'}">
+        <span class="nav-group-label">Doctorant</span>
+        <a th:href="@{/doctorant/register-phd}">New PhD Application</a>
+        <a th:href="@{/doctorant/prerequisites}">Defense Prerequisites</a>
+        <a th:href="@{/doctorant/add-publication}">Add Publication</a>
+        <a th:href="@{/doctorant/add-training}">Add Training</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'DIRECTOR'}">
+        <span class="nav-group-label">Director</span>
+        <a th:href="@{/dashboard}">Applications to Review</a>
+    </div>
+    <div class="nav-section" th:if="${user != null and user.role == 'ADMIN'}">
+        <span class="nav-group-label">Administration</span>
+        <a th:href="@{/admin/final-approvals}">Final Approvals</a>
+        <a th:href="@{/admin/certificates}">Certificates</a>
+        <a th:href="@{/admin/campaigns}">Campaigns</a>
+        <a th:href="@{/admin/campaigns/create}">Create Campaign</a>
+    </div>
+    <div class="nav-account">
+        <span class="nav-user" th:if="${user != null}" th:text="${user.fullName}">User</span>
+        <span class="nav-role" th:if="${user != null}" th:classappend="${user.role == 'DOCTORANT'} ? ' role-doctorant' : (${user.role == 'DIRECTOR'} ? ' role-director' : '')" th:text="${user.role}">ROLE</span>
+        <a class="nav-logout" th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h2>Approved Registrations - Certificates</h2>
+        <p style="margin-top: 8px;">Download registration certificates for approved applications.</p>
+
+        <div th:if="${registrations == null or registrations.empty}" style="margin-top: 20px;">
+            <p>No approved registrations available yet.</p>
+        </div>
+
+        <table th:if="${registrations != null and !registrations.empty}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Student</th>
+                <th>Thesis Subject</th>
+                <th>Submission Date</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="reg : ${registrations}">
+                <td th:text="${reg.id}">1</td>
+                <td th:text="${reg.doctorant.fullName}">Student</td>
+                <td th:text="${reg.thesisSubject}">Subject</td>
+                <td th:text="${#temporals.format(reg.submissionDate, 'dd/MM/yyyy')}">Date</td>
+                <td>
+                    <a class="btn" th:href="@{/registration/{id}/certificate(id=${reg.id})}">Download Certificate</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
